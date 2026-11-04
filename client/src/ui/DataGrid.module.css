@@ -1,0 +1,67 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.search {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 200px;
+  max-width: 360px;
+  height: 32px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-sm);
+  background: var(--fill);
+  color: var(--text-3);
+}
+
+.search:focus-within {
+  box-shadow: 0 0 0 2px var(--accent);
+  color: var(--text);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  color: var(--text);
+  outline: none;
+}
+
+.search input::placeholder {
+  color: var(--text-3);
+}
+
+.count {
+  margin-left: auto;
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.grid {
+  min-height: 240px;
+}
+
+/* Cells hold components (pills, tags), so they center their content vertically. Numbers stay on the right. */
+.grid :global(.ag-cell) {
+  display: flex;
+  align-items: center;
+}
+
+.grid :global(.ag-right-aligned-cell) {
+  justify-content: flex-end;
+}

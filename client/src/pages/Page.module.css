@@ -1,0 +1,32 @@
+/* The frame every page sits in: a centered column with the shared padding, and a way to center a state. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--s-7) var(--s-7) var(--s-9);
+  animation: enter 0.3s var(--ease);
+}
+
+.center {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: var(--s-5) var(--s-4) var(--s-8);
+  }
+}

@@ -21,7 +21,18 @@ Everything simulated is labeled in the app and listed here.
 
 ## Status
 
-Step 2 of 10: the data layer. The checkout, PayPal, the dashboards and the AI arrive step by step.
+Step 3 of 10: the shell and the design system. The checkout, PayPal, the dashboards and the AI arrive step by step.
+
+## The app
+
+One window with three fixed tabs, like a browser: **Buyer**, **Seller** and **Admin**. They are the three roles of the demo, and they update each other live. A number on a tab means something happened there, and a toast says what.
+
+- The bell in the toolbar shows the notifications of the open tab.
+- Notifications arrive through Supabase Realtime. If live updates are blocked, the app checks again every twenty seconds.
+- Light and dark themes, from the toolbar. The theme follows the system until you choose one.
+- Every page has a link, such as `#/seller/payments`, so the back button works.
+
+The design system, with every color, component and chart, is at `#/ui`. Long lists use [AG Grid](https://www.ag-grid.com) Community, themed with the same tokens.
 
 ## Run it
 
@@ -91,7 +102,7 @@ Import the repository. `vercel.json` does the rest: the web app is built to `cli
 
 ```
 api/       Vercel entry, one function for the whole API
-client/    React web app (Vite)
+client/    React web app (Vite): shell, ui kit, charts, stores
 server/    API on Hono, in layers: routes, controllers, services, repositories
            db/migrations holds the SQL, src/db the migration runner and the seed
 shared/    Brand, money and key checks used by both sides

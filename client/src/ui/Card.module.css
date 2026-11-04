@@ -1,0 +1,103 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--s-6);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.flush .header {
+  margin: 0;
+  padding: var(--s-4) var(--s-6);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-4);
+  min-height: 28px;
+  margin-bottom: var(--s-4);
+}
+
+.title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* KPI tile */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+  padding: var(--s-6);
+  border-radius: var(--r-lg);
+  color: var(--tint-text);
+}
+
+.tone1 {
+  background: var(--tint-1);
+}
+
+.tone2 {
+  background: var(--tint-2);
+}
+
+.tone0 {
+  background: var(--surface);
+}
+
+.statLabel {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.statValue {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  line-height: 36px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.good {
+  color: var(--success);
+}
+
+.bad {
+  color: var(--danger);
+}

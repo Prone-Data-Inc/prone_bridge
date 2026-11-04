@@ -12,7 +12,7 @@ import {
   METHOD_SECONDS,
   methodWeight,
 } from './data.js'
-import { feeFor, toLocalMinor } from '#shared/money.js'
+import { feeFor, formatUsd, toLocalMinor } from '#shared/money.js'
 import { buyerIdentity } from './names.js'
 import { createRng } from './rng.js'
 
@@ -349,7 +349,6 @@ export function buildSeed({ now = new Date(), seed = 'pronebridge-demo', days = 
   /* A few notifications so the bells are not empty on first load. */
   const pdl = merchants.find((m) => m.slug === 'pdl')
   const lastPayout = payouts.filter((p) => p.merchant_id === pdl.id).at(-1)
-  const money = (cents) => `$${(cents / 100).toFixed(2)}`
   const notifications = [
     {
       id: rng.uuid(),
@@ -387,7 +386,7 @@ export function buildSeed({ now = new Date(), seed = 'pronebridge-demo', days = 
             kind: 'payout.paid',
             level: 'success',
             title: 'Payout sent',
-            body: `${money(lastPayout.amount_usd_cents)} is on its way to you.`,
+            body: `${formatUsd(lastPayout.amount_usd_cents)} is on its way to you.`,
             payment_id: null,
             read_at: null,
             created_at: lastPayout.paid_at,

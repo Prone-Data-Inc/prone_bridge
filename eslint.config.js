@@ -34,6 +34,11 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
+    files: ['client/test/**/*.js'],
+    extends: [js.configs.recommended],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
     files: ['**/*.test.{js,jsx}'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },

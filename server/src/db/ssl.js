@@ -5,24 +5,28 @@ import { existsSync, readFileSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import { ROOT } from '#server/config/dotenv.js'
 
+/* Where the Supabase CA certificate is expected when no setting says otherwise. */
+export const DEFAULT_CA_FILE = 'certs/supabase-ca.crt'
+
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
 
 export const isLocalDatabase = (url) => LOCAL_HOSTS.has(new URL(url).hostname)
 
 /* The CA as PEM text. Accepts "\n" written as two characters, which is how a multi-line value often survives a .env file. */
-export function readCa({ sslCa, sslCaFile }) {
+export function readCa({ sslCa, sslCaFile }, defaultCaFile = DEFAULT_CA_FILE) {
   if (sslCa) return sslCa.replaceAll('\\n', '\n')
-  if (!sslCaFile) return undefined
-  const file = isAbsolute(sslCaFile) ? sslCaFile : join(ROOT, sslCaFile)
+  const wanted = sslCaFile || defaultCaFile
+  const file = isAbsolute(wanted) ? wanted : join(ROOT, wanted)
+  if (!sslCaFile && !existsSync(file)) return undefined
   if (!existsSync(file)) {
-    throw new Error(`DATABASE_SSL_CA_FILE points to ${sslCaFile}, but that file does not exist.`)
+    throw new Error(`DATABASE_SSL_CA_FILE points to ${wanted}, but that file does not exist.`)
   }
   return readFileSync(file, 'utf8')
 }
 
-export function sslFor(database) {
+export function sslFor(database, { defaultCaFile } = {}) {
   if (isLocalDatabase(database.url)) return false
-  const ca = readCa(database)
+  const ca = readCa(database, defaultCaFile)
   return ca ? { ca, rejectUnauthorized: true } : { rejectUnauthorized: true }
 }
 

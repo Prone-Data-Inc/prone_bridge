@@ -11,10 +11,12 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <script>
-      /* Follow the system theme before the first paint, so there is no flash. */
+      /* Apply the saved or system theme before the first paint, so there is no flash. */
       try {
-        document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      } catch {
+        var saved = window.localStorage.getItem('pb.theme')
+        var dark = matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.dataset.theme = saved === 'dark' || saved === 'light' ? saved : dark ? 'dark' : 'light'
+      } catch (error) {
         document.documentElement.dataset.theme = 'light'
       }
     </script>

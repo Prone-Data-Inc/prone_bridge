@@ -1,0 +1,163 @@
+/* Chrome tab anatomy: rounded top, concave flares joining the toolbar, dividers between idle tabs, fading titles. */
+.strip {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+  height: var(--tabstrip-h);
+  padding: 0 var(--s-3);
+  background: var(--tabstrip);
+}
+
+.tabs {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  min-width: 0;
+  height: 100%;
+  padding-left: var(--s-2);
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  flex: 0 1 184px;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 44px;
+  height: 36px;
+  padding: 0 var(--s-3);
+  border-radius: 10px 10px 0 0;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  text-align: left;
+  user-select: none;
+  isolation: isolate;
+  container-type: inline-size;
+}
+
+.tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.active {
+  z-index: 1;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+
+.active::before,
+.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.active::before {
+  left: -10px;
+  background: radial-gradient(circle at 0 0, transparent 9.5px, var(--bg) 10px);
+}
+
+.active::after {
+  right: -10px;
+  background: radial-gradient(circle at 100% 0, transparent 9.5px, var(--bg) 10px);
+}
+
+.hover {
+  position: absolute;
+  inset: 4px 2px 5px;
+  z-index: -1;
+  border-radius: var(--r-sm);
+  transition: background-color 0.15s var(--ease);
+}
+
+.tab:not(.active):hover .hover {
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
+}
+
+.divider {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+  transform: translateY(-50%);
+}
+
+.tab:first-child .divider,
+.active .divider,
+.active + .tab .divider,
+.tab:hover .divider,
+.tab:hover + .tab .divider {
+  opacity: 0;
+}
+
+.favicon {
+  flex-shrink: 0;
+}
+
+.active .favicon {
+  color: var(--accent);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(to right, #000 calc(100% - 18px), transparent);
+}
+
+.count {
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-full);
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  animation: pop 0.3s var(--ease);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+
+.trailing {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--s-2);
+  height: 100%;
+  padding-left: var(--s-3);
+}
+
+/* Narrow tabs keep only the icon, like Chrome. */
+@container (max-width: 80px) {
+  .title {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .tab {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .title {
+    display: none;
+  }
+}

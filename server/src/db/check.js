@@ -89,6 +89,8 @@ async function liveSignalCheck({ db, url, anon }) {
         if (['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(state)) reject(error ?? new Error(`channel ${state}`))
       })
     })
+    /* Supabase needs a moment after SUBSCRIBED before a database broadcast reaches a new listener. */
+    await new Promise((resolve) => setTimeout(resolve, 2500))
     await db.query(
       "insert into public.notifications (audience, kind, title, body) values ('admin', 'check.realtime', 'Live check', 'Safe to ignore.')",
     )

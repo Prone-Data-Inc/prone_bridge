@@ -50,6 +50,8 @@
     "@supabase/supabase-js": "^2.118.0",
     "@testing-library/react": "^16.3.3",
     "@vitejs/plugin-react": "^6.2.1",
+    "ag-grid-community": "^36.3.0",
+    "ag-grid-react": "^36.3.0",
     "concurrently": "^10.0.6",
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -62,6 +64,7 @@
     "react-dom": "^19.3.1",
     "sharp": "^0.35.5",
     "vite": "^8.3.5",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "zustand": "^5.0.16"
   }
 }

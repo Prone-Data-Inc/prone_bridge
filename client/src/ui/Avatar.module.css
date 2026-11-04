@@ -1,0 +1,29 @@
+.avatar {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.one {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.two {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.three {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.four {
+  background: var(--fill-strong);
+  color: var(--text-2);
+}

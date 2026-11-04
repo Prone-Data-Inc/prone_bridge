@@ -9,6 +9,7 @@ export default defineConfig({
   test: {
     include: ['{api,brand,client,scripts,server,shared}/**/*.test.{js,jsx}'],
     environment: 'node',
+    setupFiles: ['./client/test/setup.js'],
     clearMocks: true,
     restoreMocks: true,
   },

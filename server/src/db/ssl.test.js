@@ -24,7 +24,14 @@ describe('database TLS', () => {
   })
 
   it('always verifies a remote server, with the system authorities by default', () => {
-    expect(sslFor({ url: remote })).toEqual({ rejectUnauthorized: true })
+    expect(sslFor({ url: remote }, { defaultCaFile: join(dir, 'none.crt') })).toEqual({ rejectUnauthorized: true })
+  })
+
+  it('uses the certificate in the default place when it exists, without any setting', () => {
+    expect(sslFor({ url: remote }, { defaultCaFile: join(dir, 'ca.crt') })).toEqual({
+      ca: PEM,
+      rejectUnauthorized: true,
+    })
   })
 
   it('verifies against the Supabase CA when one is given as text', () => {
