@@ -1,3 +1,10 @@
+/* The scrolling area of one tab. */
+.scroller {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 /* The frame every page sits in: a centered column with the shared padding, and a way to center a state. */
 .page {
   display: flex;

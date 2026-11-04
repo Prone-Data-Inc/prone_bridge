@@ -16,6 +16,13 @@ export function createCatalogService({ repository }) {
       return { merchant: publicMerchant(merchant), products: await repository.listProducts(merchant.id) }
     },
 
+    async getProduct(slug, product) {
+      const merchant = await merchantOrFail(slug)
+      const found = await repository.findProduct(merchant.id, product)
+      if (!found) throw notFound('That course is not available.')
+      return { merchant: publicMerchant(merchant), product: found }
+    },
+
     async listCountries(slug) {
       const merchant = await merchantOrFail(slug)
       const countries = (await repository.listCountries(merchant.id))

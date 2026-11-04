@@ -13,6 +13,8 @@ function check(schema, input) {
 
 export const parseQuery = (c, schema) => check(schema, c.req.query())
 
+export const parseParams = (c, schema) => check(schema, c.req.param())
+
 export async function parseBody(c, schema) {
   let body
   try {

@@ -35,7 +35,7 @@ export default function TabStrip() {
               type="button"
               role="tab"
               aria-selected={selected}
-              aria-controls="workspace"
+              aria-controls={`workspace-${id}`}
               tabIndex={selected || (!active && index === 0) ? 0 : -1}
               className={cx(s.tab, selected && s.active)}
               onClick={() => go(id)}

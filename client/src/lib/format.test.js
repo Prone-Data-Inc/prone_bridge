@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compact, formatNumber, initials, percent, timeAgo } from './format.js'
+import { capitalize, compact, courseFacts, formatNumber, initials, percent, timeAgo, usd } from './format.js'
 
 describe('numbers', () => {
   it('formats with separators and compacts for axes', () => {
@@ -34,6 +34,26 @@ describe('timeAgo', () => {
 
   it('never goes negative for a time in the future', () => {
     expect(timeAgo(new Date(now + 60_000).toISOString(), now)).toBe('just now')
+  })
+})
+
+describe('course prices and facts', () => {
+  it('writes whole dollars plainly and keeps the cents when there are some', () => {
+    expect(usd(3900)).toBe('$39')
+    expect(usd(0)).toBe('$0')
+    expect(usd(3950)).toBe('$39.50')
+    expect(usd(499)).toBe('$4.99')
+  })
+
+  it('capitalizes the first letter only', () => {
+    expect(capitalize('beginner')).toBe('Beginner')
+    expect(capitalize('')).toBe('')
+    expect(capitalize()).toBe('')
+  })
+
+  it('sums a course up in one line', () => {
+    expect(courseFacts({ lessons: 20, hours: 4.5, level: 'beginner' })).toBe('20 lessons, 4.5 h, Beginner')
+    expect(courseFacts({ lessons: 14, hours: 3, level: 'intermediate' })).toBe('14 lessons, 3 h, Intermediate')
   })
 })
 

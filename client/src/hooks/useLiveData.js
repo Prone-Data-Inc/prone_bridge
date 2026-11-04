@@ -2,6 +2,7 @@
    and the notifications. When the live connection is not up (blocked network, no keys), it falls back to checking every
    twenty seconds, and it checks again whenever the window comes back into view. */
 import { useEffect } from 'react'
+import { startLearner } from '@/stores/learner.js'
 import { startNavigation, useNav } from '@/stores/nav.js'
 import { startNotifications, useNotifications } from '@/stores/notifications.js'
 import { startRealtime, useRealtime } from '@/stores/realtime.js'
@@ -15,7 +16,7 @@ export function useLiveData() {
   const status = useRealtime((state) => state.status)
 
   useEffect(() => {
-    const stops = [startTheme(), startNavigation(), startRealtime(), startNotifications()]
+    const stops = [startTheme(), startNavigation(), startRealtime(), startNotifications(), startLearner()]
     return () => stops.forEach((stop) => stop())
   }, [])
 

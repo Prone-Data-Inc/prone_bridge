@@ -43,4 +43,18 @@ describe('tabs', () => {
     expect(groups.flatMap((group) => group.sections)).toHaveLength(tabById('seller').sections.length)
     expect(groupsOf(tabById('admin')).map((group) => group.label)).toEqual(['Operations', 'Network', 'Trust'])
   })
+
+  it('gives the storefront its pages, with the ones reached by a link kept out of any menu', () => {
+    const buyer = tabById('buyer')
+    expect(buyer.sections.map((section) => section.id)).toEqual(['home', 'course', 'checkout', 'learn'])
+    expect(buyer.sections.filter((section) => section.hidden).map((section) => section.id)).toEqual([
+      'course',
+      'checkout',
+      'learn',
+    ])
+    for (const tab of TABS) {
+      const shown = groupsOf(tab).flatMap((group) => group.sections)
+      expect(shown.every((section) => !section.hidden)).toBe(true)
+    }
+  })
 })

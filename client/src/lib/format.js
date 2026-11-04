@@ -1,5 +1,15 @@
 /* Number and time formatting for the interface. Money formatting lives in shared/src/money.js. */
+import { formatUsd } from '#shared/money.js'
+
 const LOCALE = 'en-US'
+
+/* $39 for a round amount, $39.50 otherwise. For prices on a storefront. */
+export const usd = (cents) => (cents % 100 === 0 ? `$${cents / 100}` : formatUsd(cents))
+
+export const capitalize = (text = '') => text.charAt(0).toUpperCase() + text.slice(1)
+
+/* "24 lessons, 6.5 h, Beginner" */
+export const courseFacts = ({ lessons, hours, level }) => `${lessons} lessons, ${hours} h, ${capitalize(level)}`
 
 const number = new Intl.NumberFormat(LOCALE)
 const compactFormat = new Intl.NumberFormat(LOCALE, { notation: 'compact', maximumFractionDigits: 1 })

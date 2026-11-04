@@ -31,6 +31,16 @@ export const TABS = [
     identity: { name: 'Guest learner', role: 'Buyer' },
     sections: [
       { id: 'home', label: 'Courses', icon: House, subtitle: 'The storefront of Prone Data Learning.', step: 4 },
+      {
+        id: 'course',
+        label: 'Course',
+        icon: House,
+        subtitle: 'A course from Prone Data Learning.',
+        step: 4,
+        hidden: true,
+      },
+      { id: 'checkout', label: 'Checkout', icon: CreditCard, subtitle: 'Pay with ProneBridge.', step: 4, hidden: true },
+      { id: 'learn', label: 'My courses', icon: House, subtitle: 'What you have unlocked.', step: 4, hidden: true },
     ],
   },
   {
@@ -167,10 +177,10 @@ export const tabById = (id) => TABS.find((tab) => tab.id === id)
 
 export const sectionOf = (tabId, sectionId) => tabById(tabId)?.sections.find((section) => section.id === sectionId)
 
-/* The sidebar groups of a tab, in order, each with its sections. */
+/* The sidebar groups of a tab, in order, each with its sections. Pages marked hidden are reached by links, not the sidebar. */
 export function groupsOf(tab) {
   const groups = []
-  for (const section of tab.sections) {
+  for (const section of tab.sections.filter((item) => !item.hidden)) {
     let group = groups.find((item) => item.label === section.group)
     if (!group) groups.push((group = { label: section.group, sections: [] }))
     group.sections.push(section)

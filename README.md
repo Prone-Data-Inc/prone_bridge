@@ -21,7 +21,7 @@ Everything simulated is labeled in the app and listed here.
 
 ## Status
 
-Step 3 of 10: the shell and the design system. The checkout, PayPal, the dashboards and the AI arrive step by step.
+Step 4 of 10: the buyer. The storefront and the checkout work end to end with simulated local methods. Card and PayPal, the dashboards and the AI arrive step by step.
 
 ## The app
 
@@ -31,6 +31,16 @@ One window with three fixed tabs, like a browser: **Buyer**, **Seller** and **Ad
 - Notifications arrive through Supabase Realtime. If live updates are blocked, the app checks again every twenty seconds.
 - Light and dark themes, from the toolbar. The theme follows the system until you choose one.
 - Every page has a link, such as `#/seller/payments`, so the back button works.
+
+### The buyer
+
+The Buyer tab is the storefront of Prone Data Learning, the demo seller, in its own green. Pressing Buy opens the ProneBridge checkout, in blue.
+
+- The buyer picks a country. The price, the currency and the payment methods follow it.
+- Local methods are simulated. A demo control lets you approve, decline or time out each payment, so every ending can be shown.
+- When a payment succeeds, the buyer gets a notification, the course unlocks, and the Seller tab gets a "New sale".
+- Card and PayPal show as "Soon" until PayPal is connected.
+- Every attempt carries an idempotency key, so a retry never charges twice.
 
 The design system, with every color, component and chart, is at `#/ui`. Long lists use [AG Grid](https://www.ag-grid.com) Community, themed with the same tokens.
 

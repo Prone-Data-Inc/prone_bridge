@@ -3,13 +3,19 @@
 import { Hono } from 'hono'
 import { notFound } from '#server/lib/errors.js'
 import { catalogRoutes } from './catalog.routes.js'
+import { checkoutRoutes } from './checkout.routes.js'
 import { healthRoutes } from './health.routes.js'
+import { learnerRoutes } from './learner.routes.js'
 import { notificationRoutes } from './notification.routes.js'
+import { simulatorRoutes } from './simulator.routes.js'
 
 export function createRoutes({ controllers }) {
   const routes = new Hono()
   routes.route('/health', healthRoutes(controllers))
   routes.route('/catalog', catalogRoutes(controllers))
+  routes.route('/checkout', checkoutRoutes(controllers))
+  routes.route('/simulator', simulatorRoutes(controllers))
+  routes.route('/learners', learnerRoutes(controllers))
   routes.route('/notifications', notificationRoutes(controllers))
   routes.all('*', () => {
     throw notFound()

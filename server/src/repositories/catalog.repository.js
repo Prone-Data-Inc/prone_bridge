@@ -11,6 +11,16 @@ export function createCatalogRepository({ db }) {
       return row ? camelize(row) : null
     },
 
+    async findProduct(merchantId, slug) {
+      const [row] = await db.query(
+        `select id, slug, title, subtitle, summary, category, level, lessons, hours::float8 as hours, price_usd_cents, cover
+           from public.products
+          where merchant_id = $1 and slug = $2 and published`,
+        [merchantId, slug],
+      )
+      return row ? camelize(row) : null
+    },
+
     async listProducts(merchantId) {
       const rows = await db.query(
         `select id, slug, title, subtitle, summary, category, level, lessons, hours::float8 as hours, price_usd_cents, cover

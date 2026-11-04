@@ -28,6 +28,15 @@ describe('TabStrip', () => {
     expect(tabs.map((tab) => tab.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false'])
   })
 
+  it('points each tab at its own pane', () => {
+    render(<TabStrip />)
+    expect(screen.getAllByRole('tab').map((tab) => tab.getAttribute('aria-controls'))).toEqual([
+      'workspace-buyer',
+      'workspace-seller',
+      'workspace-admin',
+    ])
+  })
+
   it('cannot close, add or move tabs', () => {
     render(<TabStrip />)
     expect(screen.queryByRole('button', { name: /close/i })).toBeNull()

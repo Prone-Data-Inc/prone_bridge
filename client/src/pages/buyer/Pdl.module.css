@@ -1,0 +1,152 @@
+/* Prone Data Learning's look: the same design system, with its own accent. Everything inside .skin that uses --accent turns
+   green, so a button, a link or a focus ring is PDL's, not ProneBridge's. The ProneBridge checkout does not use it. */
+.skin {
+  --accent: #0b7a43;
+  --accent-hover: #08623a;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(1, 191, 99, 0.12);
+  --tint-1: #e8f6ee;
+  --tint-2: #e6f1ee;
+  --logo-mark: #01bf63;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme='dark'] .skin {
+  --accent: #3ddc97;
+  --accent-hover: #6aeab5;
+  --accent-contrast: #04210f;
+  --accent-soft: rgba(61, 220, 151, 0.14);
+  --tint-1: #10301f;
+  --tint-2: #11302b;
+}
+
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 var(--s-7);
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  height: 64px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-sm);
+}
+
+.logo {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 36px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-full);
+  color: var(--text-2);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.link:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+
+.current {
+  background: var(--fill);
+  color: var(--text);
+}
+
+.who {
+  display: inline-flex;
+  margin-left: var(--s-1);
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+}
+
+/* Footer */
+.footer {
+  margin-top: var(--s-9);
+  padding: var(--s-7) 0 var(--s-9);
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+@media (max-width: 720px) {
+  .container {
+    padding: 0 var(--s-4);
+  }
+
+  .bar {
+    height: 56px;
+  }
+
+  .logo {
+    height: 24px;
+  }
+
+  .bar {
+    gap: var(--s-2);
+  }
+
+  .link {
+    padding: 0 var(--s-2);
+  }
+
+  .who {
+    display: none;
+  }
+}

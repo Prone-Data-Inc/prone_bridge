@@ -15,6 +15,18 @@
 .page {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+}
+
+.pane {
+  height: 100%;
+  overflow: hidden;
+}
+
+.pane[hidden] {
+  display: none;
+}
+
+.scrolls {
   overflow-y: auto;
-  overflow-x: hidden;
 }
