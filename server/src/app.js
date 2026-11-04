@@ -18,8 +18,14 @@ import { mountClient } from '#server/static.js'
 
 const MAX_BODY_BYTES = 1024 * 1024
 
-export function createApp({ env = getEnv(), logger = defaultLogger(env), db = createDbFromEnv(env, logger) } = {}) {
-  const container = createContainer({ env, db })
+/* paypal: tests pass a stand-in for PayPal's client. Left out, the real one is used (the sandbox only). */
+export function createApp({
+  env = getEnv(),
+  logger = defaultLogger(env),
+  db = createDbFromEnv(env, logger),
+  paypal,
+} = {}) {
+  const container = createContainer({ env, db, logger, paypal })
   const api = new Hono()
 
   api.use('*', requestContext({ logger }))

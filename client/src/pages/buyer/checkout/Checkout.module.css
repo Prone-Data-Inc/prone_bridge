@@ -336,6 +336,92 @@
   font-size: var(--fs-xs);
 }
 
+/* Card fields and the PayPal button: PayPal draws the inputs and the button into these boxes. */
+.card,
+.paypal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.cardFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.cardFields[hidden] {
+  display: none;
+}
+
+.cardRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.cardPair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+
+.cardLabel {
+  color: var(--text-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+/* PayPal's iframes need a box with a fixed height. */
+.cardField {
+  height: 44px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: #fff;
+  transition: border-color var(--dur) var(--ease);
+}
+
+.cardField:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cardNote {
+  color: var(--text-2);
+}
+
+.linkButton {
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+  text-decoration: underline;
+}
+
+.paypalSlot {
+  min-height: 48px;
+}
+
+.paypalSlot[hidden] {
+  display: none;
+}
+
+.paypalSlot paypal-button {
+  display: block;
+  width: 100%;
+}
+
+.pendingIcon {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin-bottom: var(--s-3);
+  border-radius: 50%;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
 .problem {
   display: flex;
   align-items: flex-start;

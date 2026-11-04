@@ -189,7 +189,7 @@ describe('buyer checkout', () => {
       expect((await pay({ country: 'SN' })).status).toBe(201)
     })
 
-    it('says PayPal and card connect later, and creates nothing', async () => {
+    it('says PayPal and card are unavailable while PayPal is not connected, and creates nothing', async () => {
       const before = { payments: await count('payments'), buyers: await count('buyers') }
       for (const method of ['paypal', 'card']) {
         const { status, body } = await pay({ method })

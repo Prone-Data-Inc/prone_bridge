@@ -106,10 +106,41 @@ export const paymentOf = (over = {}) => ({
   country: { code: 'CI', name: "Côte d'Ivoire" },
   product: { id: 'p-ai', slug: 'ai-for-work', title: 'AI for Work' },
   buyer: { id: 'buyer-1', name: 'Aminata Koné', email: 'aminata.kone@example.com' },
+  card: null,
   createdAt: '2026-11-04T10:00:00.000Z',
   completedAt: null,
   ...over,
 })
+
+/* A payment that goes through the PayPal sandbox: charged in US dollars, not simulated. */
+export const paypalPaymentOf = (over = {}) =>
+  paymentOf({
+    status: 'requires_payment',
+    provider: 'paypal',
+    simulated: false,
+    displayCurrency: 'USD',
+    displayAmountMinor: 3900,
+    fxRate: 1,
+    method: { id: 'card', label: 'Card' },
+    ...over,
+  })
+
+export const paypalSucceeded = (over = {}) =>
+  paypalPaymentOf({
+    status: 'succeeded',
+    completedAt: '2026-11-04T10:00:04.000Z',
+    card: { brand: 'visa', last4: '1881' },
+    ...over,
+  })
+
+export const paypalFailed = (over = {}) =>
+  paypalPaymentOf({
+    status: 'failed',
+    failureCode: 'card_declined',
+    failureMessage: 'The card was declined.',
+    completedAt: '2026-11-04T10:00:04.000Z',
+    ...over,
+  })
 
 export const succeededPayment = (over = {}) =>
   paymentOf({ status: 'succeeded', completedAt: '2026-11-04T10:00:04.000Z', ...over })

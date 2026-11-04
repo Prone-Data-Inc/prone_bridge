@@ -27,9 +27,12 @@ export default function LineChart({ labels, series, format, caption, height = 24
   /* With many labels, show about six so they never collide. */
   const labelEvery = Math.max(1, Math.ceil(labels.length / 6))
 
+  /* The pointer is in screen pixels and the chart is drawn in the page's pixels. On a zoomed screen they differ, so the
+     pointer is turned into a share of the chart's width first. */
   const onPointerMove = (event) => {
-    const left = event.currentTarget.getBoundingClientRect().left
-    setIndex(clamp(Math.round(((event.clientX - left - PAD.left) / plotW) * last)))
+    const box = event.currentTarget.getBoundingClientRect()
+    const x = (event.clientX - box.left) * (box.width ? width / box.width : 1)
+    setIndex(clamp(Math.round(((x - PAD.left) / plotW) * last)))
   }
 
   const onKeyDown = (event) => {

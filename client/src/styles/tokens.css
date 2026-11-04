@@ -44,6 +44,11 @@
   --tabstrip-h: 44px;
   --toolbar-h: 56px;
   --page-max: 1240px;
+  --site-max: 1160px;
+
+  /* How much the whole interface is scaled up on a very large screen (see base.css). 1 on a laptop and a phone. Anything
+     sized from the window (vw, vh, a measured position) divides by it, since zoom scales lengths but not the window. */
+  --zoom: 1;
 
   /* Motion */
   --ease: cubic-bezier(0.215, 0.61, 0.355, 1);

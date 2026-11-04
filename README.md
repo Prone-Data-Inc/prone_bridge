@@ -12,8 +12,9 @@ Sellers collect from buyers across African countries without a company in each o
 
 Everything simulated is labeled in the app and listed here.
 
-- PayPal runs in the PayPal sandbox. No real money moves.
+- PayPal runs in the PayPal sandbox. No real money moves. Card and PayPal payments, and the payouts to a seller, go through it.
 - Local payment methods, such as mobile money and bank transfer, are simulations with prefilled test data. The app says so wherever they appear.
+- Payouts of local sales and of the demo history are simulated too.
 - Exchange rates for local prices are indicative and simulated.
 - The demo data is invented: five fictional merchants, their courses, buyers, prices, fees and ninety days of traffic.
 - No bank, wallet or payment company is integrated, and none is named as a partner.
@@ -21,7 +22,7 @@ Everything simulated is labeled in the app and listed here.
 
 ## Status
 
-Step 4 of 10: the buyer. The storefront and the checkout work end to end with simulated local methods. Card and PayPal, the dashboards and the AI arrive step by step.
+Step 5 of 10: PayPal. The checkout takes card and PayPal payments in the PayPal sandbox, settles them from PayPal's verified webhooks, and pays sellers with PayPal Payouts. The dashboards and the AI arrive step by step.
 
 ## The app
 
@@ -38,9 +39,13 @@ The Buyer tab is the storefront of Prone Data Learning, the demo seller, in its 
 
 - The buyer picks a country. The price, the currency and the payment methods follow it.
 - Local methods are simulated. A demo control lets you approve, decline or time out each payment, so every ending can be shown.
+- Card and PayPal run in the PayPal sandbox and charge in US dollars, because PayPal takes no African currency. They show as "Soon" until PayPal is connected. Their demo control can approve or decline.
 - When a payment succeeds, the buyer gets a notification, the course unlocks, and the Seller tab gets a "New sale".
-- Card and PayPal show as "Soon" until PayPal is connected.
 - Every attempt carries an idempotency key, so a retry never charges twice.
+
+### Large screens
+
+From a 32 inch monitor to a 64 inch screen, the whole interface (type, spacing, icons, charts, the grid) is scaled up in steps, and the content spreads a little wider. The steps follow the window in CSS pixels, so they already count the system's display scaling. A laptop and a phone are not scaled. The steps are in `client/src/styles/base.css`.
 
 The design system, with every color, component and chart, is at `#/ui`. Long lists use [AG Grid](https://www.ag-grid.com) Community, themed with the same tokens.
 
@@ -77,6 +82,31 @@ npm run db:check
 Live updates travel as small signals on a public channel. They carry ids and a status, never a name, an email or an amount.
 
 On Vercel, use the transaction pooler connection string for `DATABASE_URL` and paste the certificate text into `DATABASE_SSL_CA`.
+
+## PayPal
+
+Everything runs in the PayPal sandbox. The app never calls live PayPal.
+
+How a payment goes:
+
+1. The buyer picks card or PayPal. The page loads PayPal's JavaScript SDK v6 and a short lived client token from the server, never the secret.
+2. Pressing the button makes the payment and a PayPal order on the server. The price comes from the database, never from the browser.
+3. PayPal draws its own button or card fields. Card numbers go to PayPal, never to this app.
+4. When the buyer approves, the server captures the order and settles the payment: the course unlocks and both sides are told.
+5. PayPal's webhook says the same thing again. It is verified by PayPal, written once by its event id, and settles nothing twice.
+
+Set it up:
+
+1. In the [PayPal developer dashboard](https://developer.paypal.com/dashboard/applications/sandbox), create a sandbox app. Put its client ID and secret in `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`.
+2. For card payments, open the app, then Features, and switch on Advanced Credit and Debit Card Payments.
+3. To send real sandbox payouts, put the email of a sandbox account in `PAYPAL_PAYOUT_EMAIL`. Without it, payouts stay simulated.
+4. Webhooks need a public HTTPS address, so this is done once the app is deployed. In the app, open Webhooks and add `https://your-domain/api/webhooks/paypal` with these events: Checkout order approved, Payment capture completed, declined, denied, pending, refunded and reversed, and Payments payout batch and payout item events. Copy the Webhook ID into `PAYPAL_WEBHOOK_ID`. Without a webhook, the capture answer still settles every payment, so the demo works locally.
+
+Test with PayPal's published sandbox card `4012 8888 8888 1881`, any future date and any three digits. The demo control on the checkout can decline a payment on demand.
+
+Paying sellers: `POST /api/payouts/run` pays out the paid sales no payout covers yet. Genuine PayPal sales go to the seller in one PayPal Payouts batch. Everything else, the local methods and the demo history, is paid out in simulation only and labeled so. The payout's reference is the batch id sent to PayPal, so a retry is the same payout, never a second one. The seller dashboard gets a button for it in step 6.
+
+There is no sign-in in this demo, so these routes are open. They only ever touch the sandbox.
 
 ## Run it with Docker
 

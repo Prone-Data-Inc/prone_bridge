@@ -3,36 +3,13 @@
    whether the method may be used. The browser only says what it wants. A buyer's country chooses which methods and which
    currency they see. It is never used to judge risk. */
 import { feeFor, toLocalMinor } from '#shared/money.js'
-import { failureMessage } from '#shared/failures.js'
 import { badRequest, conflict, notFound, unavailable } from '#server/lib/errors.js'
 import { reference } from '#server/lib/ids.js'
 import { createCheckoutRepository } from '#server/repositories/checkout.repository.js'
 import { createPaymentRepository } from '#server/repositories/payment.repository.js'
+import { paymentView } from './payment.view.js'
 
-/* The shape a screen gets. The seller's fee stays out of a buyer's view. */
-export function paymentView(payment) {
-  return {
-    id: payment.id,
-    reference: payment.reference,
-    status: payment.status,
-    failureCode: payment.failureCode ?? null,
-    failureMessage: payment.failureCode ? failureMessage(payment.failureCode) : null,
-    provider: payment.provider,
-    simulated: payment.provider === 'simulated',
-    amountUsdCents: payment.amountUsdCents,
-    displayCurrency: payment.displayCurrency,
-    displayAmountMinor: payment.displayAmountMinor,
-    fxRate: payment.fxRate,
-    method: { id: payment.methodId, label: payment.methodLabel },
-    country: { code: payment.countryCode, name: payment.countryName },
-    product: { id: payment.productId, slug: payment.productSlug, title: payment.productTitle },
-    buyer: { id: payment.buyerId, name: payment.buyerName, email: payment.buyerEmail },
-    createdAt: payment.createdAt,
-    completedAt: payment.completedAt,
-  }
-}
-
-export function createCheckoutService({ db, catalogRepository }) {
+export function createCheckoutService({ db, catalogRepository, paypal }) {
   const checkout = createCheckoutRepository({ db })
   const payments = createPaymentRepository({ db })
 
@@ -85,17 +62,21 @@ export function createCheckoutService({ db, catalogRepository }) {
         offer.merchantEnabled &&
         offer.corridorStatus !== 'down'
       if (!available) throw badRequest('That payment method is not available in this country.')
-      if (offer.provider !== 'simulated') throw unavailable('PayPal and card checkout connect in the next step.')
+      /* Card and PayPal go through PayPal, which only charges in US dollars. Local methods show the local price. */
+      const viaPaypal = offer.provider === 'paypal'
+      if (viaPaypal && !paypal.status().available) throw unavailable('PayPal is not connected yet.')
 
       const amountUsdCents = product.priceUsdCents
       const money = {
-        displayCurrency: offer.currency,
-        displayAmountMinor: toLocalMinor(amountUsdCents, {
-          fxPerUsd: offer.fxPerUsd,
-          minorUnits: offer.minorUnits,
-          priceStep: offer.priceStep,
-        }),
-        fxRate: offer.fxPerUsd,
+        displayCurrency: viaPaypal ? 'USD' : offer.currency,
+        displayAmountMinor: viaPaypal
+          ? amountUsdCents
+          : toLocalMinor(amountUsdCents, {
+              fxPerUsd: offer.fxPerUsd,
+              minorUnits: offer.minorUnits,
+              priceStep: offer.priceStep,
+            }),
+        fxRate: viaPaypal ? 1 : offer.fxPerUsd,
         feeUsdCents: feeFor(amountUsdCents, { feeBps: offer.feeBps, feeFixedCents: offer.feeFixedCents }),
       }
 
@@ -113,7 +94,7 @@ export function createCheckoutService({ db, catalogRepository }) {
           countryCode: country,
           amountUsdCents,
           ...money,
-          status: 'processing',
+          status: viaPaypal ? 'requires_payment' : 'processing',
           provider: offer.provider,
           idempotencyKey,
         })
@@ -141,7 +122,14 @@ export function createCheckoutService({ db, catalogRepository }) {
         return created
       })
 
-      return paymentView(await payments.findById(id))
+      const view = paymentView(await payments.findById(id))
+
+      /* A PayPal payment needs its order before the buyer can pay. A repeat of the same request gets the same order. */
+      if (viaPaypal && (view.status === 'requires_payment' || view.status === 'processing')) {
+        const { orderId } = await paypal.createOrder(id)
+        return { payment: view, paypal: { orderId } }
+      }
+      return { payment: view }
     },
 
     async getPayment(id) {

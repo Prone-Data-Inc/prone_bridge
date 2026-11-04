@@ -6,7 +6,7 @@
 }
 
 .title {
-  font-size: clamp(32px, 4.4vw, 48px);
+  font-size: clamp(32px, calc(4.4vw / var(--zoom)), 48px);
   font-weight: var(--fw-semibold);
   letter-spacing: -0.03em;
   line-height: 1.05;

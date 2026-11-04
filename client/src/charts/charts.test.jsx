@@ -44,6 +44,22 @@ describe('LineChart', () => {
     expect(screen.queryByRole('status')).toBeNull()
   })
 
+  it('points at the same value on a zoomed screen, where the browser measures in bigger pixels', () => {
+    /* The chart is drawn 480 wide. On a screen zoomed to 1.5 the browser says it is 720 wide and starts at 100. */
+    const tip = (zoom, clientX) => {
+      const { container, unmount } = render(<LineChart {...props} />)
+      const svg = container.querySelector('svg')
+      svg.getBoundingClientRect = () => ({ left: 100 * zoom, width: 480 * zoom })
+      fireEvent.pointerMove(svg, { clientX })
+      const shown = within(screen.getByRole('status')).getAllByText(/^\d$/)[0].textContent
+      unmount()
+      return shown
+    }
+    /* the same spot on the chart, 300 from its left edge, whatever the zoom */
+    expect(tip(1.5, 100 * 1.5 + 300 * 1.5)).toBe(tip(1, 100 + 300))
+    expect(tip(2, 100 * 2 + 40 * 2)).toBe(tip(1, 100 + 40))
+  })
+
   it('moves a crosshair with the arrow keys', () => {
     render(<LineChart {...props} />)
     const chart = screen.getByLabelText('Volume by day')

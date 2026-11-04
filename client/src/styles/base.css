@@ -120,6 +120,72 @@ select optgroup {
   border: 0;
 }
 
+/* Large screens, 32 to 64 inches. A laptop is read from about 50 cm, a big monitor or a TV from much further, so the
+   whole interface (type, spacing, icons, charts, the grid) is scaled up in steps, and the content is let to spread a
+   little wider. The steps follow the window in CSS pixels, so they already count the system's display scaling: a 4K
+   monitor set to 150% reports 2560 wide and gets 1.33, the same screen at 100% reports 3840 and gets 2. Both the width
+   and the height must be there, so a wide but short window (a half screen) is not scaled up. Each block sets --zoom to
+   the same number as zoom, because code that works from measurements divides by it.
+   Keep the thresholds rising: client/src/styles/zoom.test.js checks them. */
+@media (min-width: 2300px) and (min-height: 1100px) {
+  :root {
+    zoom: 1.2;
+    --zoom: 1.2;
+    --page-max: 1320px;
+    --site-max: 1240px;
+  }
+}
+
+@media (min-width: 2560px) and (min-height: 1250px) {
+  :root {
+    zoom: 1.33;
+    --zoom: 1.33;
+    --page-max: 1480px;
+    --site-max: 1360px;
+  }
+}
+
+@media (min-width: 3000px) and (min-height: 1450px) {
+  :root {
+    zoom: 1.5;
+    --zoom: 1.5;
+    --page-max: 1560px;
+    --site-max: 1440px;
+  }
+}
+
+@media (min-width: 3400px) and (min-height: 1700px) {
+  :root {
+    zoom: 1.75;
+    --zoom: 1.75;
+    --page-max: 1640px;
+    --site-max: 1500px;
+  }
+}
+
+@media (min-width: 3800px) and (min-height: 1950px) {
+  :root {
+    zoom: 2;
+    --zoom: 2;
+    --page-max: 1720px;
+    --site-max: 1560px;
+  }
+}
+
+@media (min-width: 4600px) and (min-height: 2400px) {
+  :root {
+    zoom: 2.5;
+    --zoom: 2.5;
+  }
+}
+
+@media (min-width: 5600px) and (min-height: 3000px) {
+  :root {
+    zoom: 3;
+    --zoom: 3;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -10,6 +10,12 @@ vi.mock('@/api/checkout.js', () => ({
   getPayment: vi.fn(),
   settleSimulated: vi.fn(),
 }))
+vi.mock('@/api/paypal.js', () => ({
+  getPaypalStatus: vi.fn(async () => ({ available: false })),
+  getClientToken: vi.fn(),
+  capturePayment: vi.fn(),
+  cancelPayment: vi.fn(),
+}))
 vi.mock('@/api/learners.js', () => ({ listCourses: vi.fn() }))
 vi.mock('@/api/notifications.js', () => ({
   listNotifications: vi.fn(async () => ({ items: [] })),

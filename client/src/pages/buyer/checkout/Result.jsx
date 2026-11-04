@@ -1,15 +1,24 @@
-/* How a payment ended: you are in, or it did not go through and here is why. */
-import { ArrowCounterClockwise, SealCheck, WarningCircle } from '@phosphor-icons/react'
+/* How a payment ended: you are in, it did not go through and here is why, or PayPal is still confirming it. */
+import { ArrowCounterClockwise, Clock, SealCheck, WarningCircle } from '@phosphor-icons/react'
 import { formatMinor, formatUsd } from '#shared/money.js'
+import { capitalize } from '@/lib/format.js'
 import { useNav } from '@/stores/nav.js'
 import { Button } from '@/ui/Button.jsx'
 import s from './Checkout.module.css'
+
+/* "Mobile money (simulated)", "Visa ending 1881 (PayPal sandbox)", "PayPal (PayPal sandbox)". */
+const methodText = (payment) => {
+  if (payment.simulated) return `${payment.method.label} (simulated)`
+  if (payment.card) return `${capitalize(payment.card.brand ?? 'card')} ending ${payment.card.last4} (PayPal sandbox)`
+  return `${payment.method.label} (PayPal sandbox)`
+}
 
 export function Paid({ payment, place }) {
   const go = useNav((state) => state.go)
   const when = payment.completedAt
     ? new Date(payment.completedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
     : ''
+  const inDollars = payment.displayCurrency === 'USD'
 
   return (
     <section className={s.result} aria-live="polite">
@@ -25,17 +34,19 @@ export function Paid({ payment, place }) {
           <dd>
             {formatMinor(payment.displayAmountMinor, {
               currency: payment.displayCurrency,
-              minorUnits: place.minorUnits,
+              minorUnits: inDollars ? 2 : place.minorUnits,
             })}
           </dd>
         </div>
-        <div>
-          <dt>Course price</dt>
-          <dd>{formatUsd(payment.amountUsdCents)}</dd>
-        </div>
+        {!inDollars && (
+          <div>
+            <dt>Course price</dt>
+            <dd>{formatUsd(payment.amountUsdCents)}</dd>
+          </div>
+        )}
         <div>
           <dt>Method</dt>
-          <dd>{payment.method.label} (simulated)</dd>
+          <dd>{methodText(payment)}</dd>
         </div>
         <div>
           <dt>Reference</dt>
@@ -51,6 +62,30 @@ export function Paid({ payment, place }) {
         <Button variant="primary" size="lg" onClick={() => go('buyer', 'course', payment.product.slug)}>
           Start learning
         </Button>
+        <Button size="lg" onClick={() => go('buyer', 'home')}>
+          Back to courses
+        </Button>
+      </div>
+    </section>
+  )
+}
+
+/* PayPal has the money but has not confirmed it yet. The buyer is told as soon as it does, by a notification. */
+export function Pending({ payment }) {
+  const go = useNav((state) => state.go)
+  return (
+    <section className={s.result} aria-live="polite">
+      <span className={s.pendingIcon}>
+        <Clock size={44} weight="fill" aria-hidden />
+      </span>
+      <h2 className={s.stateTitle}>Payment pending</h2>
+      <p className={s.stateText}>
+        PayPal is still confirming your payment. We will tell you as soon as it goes through.
+      </p>
+      <p className={s.reference}>
+        Reference <span className={s.mono}>{payment.reference}</span>
+      </p>
+      <div className={s.resultActions}>
         <Button size="lg" onClick={() => go('buyer', 'home')}>
           Back to courses
         </Button>

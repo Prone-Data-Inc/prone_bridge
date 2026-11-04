@@ -5,8 +5,8 @@
 .panel {
   display: flex;
   flex-direction: column;
-  width: min(380px, calc(100vw - 16px));
-  max-height: min(520px, calc(100vh - 96px));
+  width: min(380px, calc(100vw / var(--zoom) - 16px));
+  max-height: min(520px, calc(100vh / var(--zoom) - 96px));
   border-radius: var(--r-lg);
   background: var(--elevated);
   box-shadow: var(--shadow-pop);

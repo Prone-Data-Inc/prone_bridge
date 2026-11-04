@@ -5,6 +5,7 @@ import { camelize } from '#server/lib/case.js'
 /* A payment with what a screen or a message needs about it. */
 const VIEW = `
   select p.id, p.reference, p.status, p.failure_code, p.provider, p.origin, p.idempotency_key,
+         p.provider_order_id, p.provider_capture_id, p.card_brand, p.card_last4, p.payout_id,
          p.merchant_id, p.product_id, p.buyer_id, p.country_code, p.method_id,
          p.amount_usd_cents, p.fee_usd_cents, p.display_currency, p.display_amount_minor,
          p.fx_rate::float8 as fx_rate, p.created_at, p.completed_at,
@@ -26,6 +27,16 @@ export function createPaymentRepository({ db }) {
 
     async findByKey(key) {
       const [row] = await db.query(`${VIEW} where p.idempotency_key = $1`, [key])
+      return row ? camelize(row) : null
+    },
+
+    async findByOrderId(orderId) {
+      const [row] = await db.query(`${VIEW} where p.provider_order_id = $1`, [orderId])
+      return row ? camelize(row) : null
+    },
+
+    async findByCaptureId(captureId) {
+      const [row] = await db.query(`${VIEW} where p.provider_capture_id = $1`, [captureId])
       return row ? camelize(row) : null
     },
 
@@ -61,6 +72,50 @@ export function createPaymentRepository({ db }) {
         ],
       )
       return row?.id ?? null
+    },
+
+    /* The PayPal order made for this payment. Set once: a second order for the same payment is never recorded. */
+    async setOrder(id, orderId) {
+      const rows = await db.query(
+        'update public.payments set provider_order_id = $2 where id = $1 and provider_order_id is null returning id',
+        [id, orderId],
+      )
+      return rows.length > 0
+    },
+
+    /* What PayPal captured: its id, and the card (brand and last four digits only) when one was used. */
+    async recordCapture(id, { captureId, cardBrand = null, cardLast4 = null }) {
+      await db.query(
+        `update public.payments
+            set provider_capture_id = coalesce($2, provider_capture_id),
+                card_brand = coalesce($3, card_brand),
+                card_last4 = coalesce($4, card_last4)
+          where id = $1`,
+        [id, captureId, cardBrand, cardLast4],
+      )
+    },
+
+    /* The buyer has paid but PayPal has not confirmed yet. */
+    async markProcessing(id) {
+      await db.query("update public.payments set status = 'processing' where id = $1 and status = 'requires_payment'", [
+        id,
+      ])
+    },
+
+    async markRefunded(id) {
+      await db.query("update public.payments set status = 'refunded' where id = $1 and status = 'succeeded'", [id])
+    },
+
+    async revokeAccess(paymentId) {
+      await db.query('delete from public.enrollments where payment_id = $1', [paymentId])
+    },
+
+    /* A payment that never reached PayPal (its order could not be made) leaves nothing behind. */
+    async removeUnstarted(id) {
+      await db.query(
+        "delete from public.payments where id = $1 and status = 'requires_payment' and provider_order_id is null",
+        [id],
+      )
     },
 
     async markSucceeded(id) {

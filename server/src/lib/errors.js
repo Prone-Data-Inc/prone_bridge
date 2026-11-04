@@ -21,3 +21,6 @@ export const payloadTooLarge = (message = 'That request is too large.') =>
 export const tooManyRequests = (message = 'Too many requests. Try again shortly.') =>
   new AppError(429, 'rate_limited', message)
 export const unavailable = (message = 'This is not available yet.') => new AppError(503, 'unavailable', message)
+/* Another service answered, and not in a way we can use. */
+export const badGateway = (message = 'A partner service did not answer well. Try again.') =>
+  new AppError(502, 'bad_gateway', message)

@@ -7,7 +7,10 @@ import { checkoutRoutes } from './checkout.routes.js'
 import { healthRoutes } from './health.routes.js'
 import { learnerRoutes } from './learner.routes.js'
 import { notificationRoutes } from './notification.routes.js'
+import { paypalRoutes } from './paypal.routes.js'
+import { payoutRoutes } from './payout.routes.js'
 import { simulatorRoutes } from './simulator.routes.js'
+import { webhookRoutes } from './webhook.routes.js'
 
 export function createRoutes({ controllers }) {
   const routes = new Hono()
@@ -17,6 +20,9 @@ export function createRoutes({ controllers }) {
   routes.route('/simulator', simulatorRoutes(controllers))
   routes.route('/learners', learnerRoutes(controllers))
   routes.route('/notifications', notificationRoutes(controllers))
+  routes.route('/paypal', paypalRoutes(controllers))
+  routes.route('/webhooks', webhookRoutes(controllers))
+  routes.route('/payouts', payoutRoutes(controllers))
   routes.all('*', () => {
     throw notFound()
   })

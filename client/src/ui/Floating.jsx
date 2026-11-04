@@ -4,21 +4,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useDismiss } from '@/hooks/useDismiss.js'
-
-const GAP = 6
-const MARGIN = 8
-
-function place(anchor, panel, align) {
-  const rect = anchor.getBoundingClientRect()
-  const { width, height } = panel.getBoundingClientRect()
-  const below = rect.bottom + GAP + height <= window.innerHeight - MARGIN || rect.top - GAP - height < MARGIN
-  const left = align === 'left' ? rect.left : rect.right - width
-  return {
-    top: below ? rect.bottom + GAP : rect.top - GAP - height,
-    left: Math.min(Math.max(MARGIN, left), window.innerWidth - width - MARGIN),
-    origin: below ? 'top' : 'bottom',
-  }
-}
+import { place } from './placement.js'
 
 function Floating({ anchorRef, panelRef, align = 'right', className, children, ...rest }) {
   const [position, setPosition] = useState(null)

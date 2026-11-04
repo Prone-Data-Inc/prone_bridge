@@ -5,6 +5,7 @@ export const FAILURES = {
   insufficient_funds: 'The balance was too low.',
   limit_exceeded: 'That amount is above your limit.',
   card_declined: 'The card was declined.',
+  paypal_declined: 'PayPal could not take that payment.',
   authentication_failed: 'The card could not be verified.',
   transfer_not_received: 'We did not receive the transfer.',
   session_expired: 'The session expired.',

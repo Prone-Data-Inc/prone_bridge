@@ -4,7 +4,7 @@
    through the same service a real provider would use. */
 import { badRequest, conflict, notFound } from '#server/lib/errors.js'
 import { createPaymentRepository } from '#server/repositories/payment.repository.js'
-import { paymentView } from './checkout.service.js'
+import { paymentView } from './payment.view.js'
 
 /* The reason a simulated decline or time-out gives, per method. */
 const DECLINE = {

@@ -30,6 +30,8 @@ const schema = z.object({
   PAYPAL_CLIENT_ID: text,
   PAYPAL_CLIENT_SECRET: text,
   PAYPAL_WEBHOOK_ID: text,
+  /* The sandbox account that receives payouts. Without it, payouts stay simulated. */
+  PAYPAL_PAYOUT_EMAIL: z.email().optional(),
 
   OPENAI_API_KEY: text,
   OPENAI_MODEL_AGENT: z.string().min(1).default('gpt-6.1-sol'),
@@ -76,6 +78,7 @@ export function loadEnv(source = process.env) {
       clientId: e.PAYPAL_CLIENT_ID,
       clientSecret: e.PAYPAL_CLIENT_SECRET,
       webhookId: e.PAYPAL_WEBHOOK_ID,
+      payoutEmail: e.PAYPAL_PAYOUT_EMAIL ?? '',
     }),
     ai: Object.freeze({
       apiKey: e.OPENAI_API_KEY,

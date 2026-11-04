@@ -1,22 +1,24 @@
-/* The logic of the checkout, kept out of the screens: which country and method are chosen, what the price is in that
-   country, and the payment itself, from pressing Pay to the answer. phase moves through
-     form -> creating -> waiting -> paid | failed
-   Nothing here decides a price: the server works out the amounts, this only shows them. */
+/* The logic of the checkout, kept out of the screens: which country and method are chosen, what the price is, and the
+   payment itself, from pressing Pay to the answer. phase moves through
+     form -> creating -> waiting -> paid | failed          local (simulated) methods
+     form -> confirming -> paid | failed | pending          card and PayPal, through the PayPal sandbox
+   Nothing here decides a price: the server works out the amounts, this only shows them.
+   The PayPal rail never leaves the form while the buyer is paying: PayPal's window and its card fields are drawn into
+   this page and must stay there until the buyer has approved. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { changeSessionCountry, createPayment, settleSimulated, startSession } from '@/api/checkout.js'
+import { cancelPayment, capturePayment } from '@/api/paypal.js'
 import { toLocalMinor } from '#shared/money.js'
 import { useCatalog } from '@/stores/catalog.js'
 import { useLearner } from '@/stores/learner.js'
 import { useNotifications } from '@/stores/notifications.js'
+import { usePaypal } from '@/stores/paypal.js'
 import { useSession } from '@/stores/session.js'
 import { freshSuffix, personaFor } from './personas.js'
 import { testPhone, timing } from './simulation.js'
 
 const COUNTRY_KEY = 'pb.country'
 const DEFAULT_COUNTRY = 'CI'
-
-/* Only the simulated methods can take a payment in this step. Card and PayPal join when they are connected. */
-export const isReady = (method) => method.provider === 'simulated'
 
 const storedCountry = () => {
   try {
@@ -37,9 +39,20 @@ const remember = (code) => {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const looksLikeEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
 
+const problemFrom = (error) => ({
+  code: error.code ?? 'error',
+  status: error.status,
+  message: error.message,
+  fields: error.details,
+})
+
+/* Where a finished payment goes next. Anything PayPal still holds is pending. */
+const phaseFor = (status) => (status === 'succeeded' ? 'paid' : status === 'failed' ? 'failed' : 'pending')
+
 export function useCheckout(product) {
   const countries = useCatalog((state) => state.countries)
   const buyer = useSession((state) => state.buyer)
+  const paypalOn = usePaypal((state) => state.available)
   const [country, setCountryCode] = useState(storedCountry)
   const [methodId, setMethodId] = useState(null)
   const [outcome, setOutcome] = useState('approve')
@@ -54,6 +67,8 @@ export function useCheckout(product) {
   const [sessionId, setSessionId] = useState(null)
   const key = useRef(crypto.randomUUID())
   const started = useRef(false)
+  /* The PayPal payment in progress: { paymentId, orderId }. */
+  const open = useRef(null)
 
   /* The country in use: the chosen one if the seller serves it, otherwise the first one served. */
   const place = useMemo(
@@ -61,22 +76,33 @@ export function useCheckout(product) {
     [countries, country],
   )
   const methods = place?.methods ?? []
-  const method = methods.find((entry) => entry.id === methodId && isReady(entry)) ?? methods.find(isReady) ?? null
 
-  /* The price in the buyer's currency. The server computes the same number again when it takes the payment. */
-  const local = useMemo(
-    () =>
-      place && product
-        ? toLocalMinor(product.priceUsdCents, {
-            fxPerUsd: place.fxPerUsd,
-            minorUnits: place.minorUnits,
-            priceStep: place.priceStep,
-          })
-        : null,
-    [place, product],
-  )
+  /* A method can be chosen when it is a simulation, or when it goes through PayPal and PayPal is connected. */
+  const ready = useCallback((entry) => entry.simulated || (entry.provider === 'paypal' && paypalOn), [paypalOn])
+  const method = methods.find((entry) => entry.id === methodId && ready(entry)) ?? methods.find(ready) ?? null
+  const viaPaypal = Boolean(method && !method.simulated)
+
+  /* What the buyer pays, in the currency they pay it in. Local methods use the local price. Card and PayPal charge in
+     US dollars, because PayPal takes no African currency. The server works out the same number again. */
+  const price = useMemo(() => {
+    if (!place || !product) return null
+    if (viaPaypal) return { currency: 'USD', minorUnits: 2, amount: product.priceUsdCents }
+    return {
+      currency: place.currency,
+      minorUnits: place.minorUnits,
+      amount: toLocalMinor(product.priceUsdCents, {
+        fxPerUsd: place.fxPerUsd,
+        minorUnits: place.minorUnits,
+        priceStep: place.priceStep,
+      }),
+    }
+  }, [place, product, viaPaypal])
 
   const phoneNumber = phone || testPhone(place?.dialCode)
+
+  useEffect(() => {
+    usePaypal.getState().ensure()
+  }, [])
 
   /* The visit starts once the course and the countries are known. It only feeds the seller's numbers. */
   useEffect(() => {
@@ -100,6 +126,13 @@ export function useCheckout(product) {
     [sessionId, touched],
   )
 
+  /* A new method starts from approving: the demo control of the last one does not carry over. */
+  const chooseMethod = useCallback((id) => {
+    setMethodId(id)
+    setOutcome('approve')
+    setProblem(null)
+  }, [])
+
   const editContact = useCallback((change) => {
     setTouched(true)
     setContact((current) => ({ ...current, ...change }))
@@ -114,37 +147,121 @@ export function useCheckout(product) {
 
   const valid = Boolean(method && contact.name.trim().length >= 2 && looksLikeEmail(contact.email.trim()))
 
+  const requestBody = useCallback(
+    () => ({
+      idempotencyKey: key.current,
+      product: product.slug,
+      country: place.code,
+      method: method.id,
+      sessionId: sessionId ?? undefined,
+      buyer: { name: contact.name.trim(), email: contact.email.trim() },
+    }),
+    [product, place, method, sessionId, contact],
+  )
+
+  /* The buyer is now known: their messages and their courses come with them. */
+  const rememberBuyer = useCallback(
+    (id) => useSession.getState().setBuyer({ id, name: contact.name.trim(), email: contact.email.trim() }),
+    [contact],
+  )
+
+  /* A payment is over: show how it ended, and bring in the notification and the unlocked course. */
+  const finalize = useCallback(async (settled) => {
+    setPayment(settled)
+    if (settled.status === 'succeeded' || settled.status === 'failed') key.current = crypto.randomUUID()
+    setPhase(phaseFor(settled.status))
+    await Promise.all([useNotifications.getState().refresh('buyer'), useLearner.getState().load()])
+  }, [])
+
+  /* Local methods: create the payment, wait for the simulated provider, then settle it the way the demo control says. */
   const pay = useCallback(async () => {
-    if (!valid || phase !== 'form') return
+    if (!valid || viaPaypal || phase !== 'form') return
     setProblem(null)
     setPhase('creating')
     try {
-      const { payment: created } = await createPayment({
-        idempotencyKey: key.current,
-        product: product.slug,
-        country: place.code,
-        method: method.id,
-        sessionId: sessionId ?? undefined,
-        buyer: { name: contact.name.trim(), email: contact.email.trim() },
-      })
+      const { payment: created } = await createPayment(requestBody())
       setPayment(created)
-      /* The buyer is now known: their messages and their courses come with them. */
-      useSession.getState().setBuyer({ id: created.buyer.id, name: contact.name.trim(), email: contact.email.trim() })
+      rememberBuyer(created.buyer.id)
       setPhase('waiting')
 
       await sleep(timing.waitMs)
       const { payment: settled } = await settleSimulated(created.id, outcome)
-      setPayment(settled)
-      key.current = crypto.randomUUID()
-      setPhase(settled.status === 'succeeded' ? 'paid' : 'failed')
-      await Promise.all([useNotifications.getState().refresh('buyer'), useLearner.getState().load()])
+      await finalize(settled)
     } catch (error) {
       /* A refusal means this request is settled: the next attempt is a new one, with its own key. */
       if (error.status === 409) key.current = crypto.randomUUID()
       setPhase('form')
-      setProblem({ code: error.code ?? 'error', status: error.status, message: error.message, fields: error.details })
+      setProblem(problemFrom(error))
     }
-  }, [valid, phase, product, place, method, sessionId, contact, outcome])
+  }, [valid, viaPaypal, phase, requestBody, rememberBuyer, outcome, finalize])
+
+  /* Card and PayPal, step one: make the payment and its PayPal order. Answers { paymentId, orderId }, or null when the
+     payment turned out to be over already. The form stays as it is. A failure is shown, then thrown to PayPal's SDK. */
+  const begin = useCallback(async () => {
+    setProblem(null)
+    try {
+      const { payment: created, paypal } = await createPayment(requestBody())
+      setPayment(created)
+      rememberBuyer(created.buyer.id)
+      if (!paypal) {
+        await finalize(created)
+        return null
+      }
+      open.current = { paymentId: created.id, orderId: paypal.orderId }
+      return open.current
+    } catch (error) {
+      if (error.status === 409 || error.status >= 500) key.current = crypto.randomUUID()
+      setProblem(problemFrom(error))
+      error.reported = true
+      throw error
+    }
+  }, [requestBody, rememberBuyer, finalize])
+
+  /* Step two, once the buyer has approved in PayPal's window or the card fields: the server takes the money. If that
+     cannot be confirmed, the order is kept, so the same capture can be asked for again and money is never taken twice. */
+  const finish = useCallback(
+    async (orderId) => {
+      const current = open.current
+      if (!current || current.orderId !== orderId) return
+      setPhase('confirming')
+      try {
+        const { payment: settled } = await capturePayment(
+          current.paymentId,
+          orderId,
+          outcome === 'decline' ? 'decline' : 'approve',
+        )
+        open.current = null
+        await finalize(settled)
+      } catch (error) {
+        setPhase('form')
+        setProblem({ ...problemFrom(error), retry: true })
+      }
+    },
+    [outcome, finalize],
+  )
+
+  const retryCapture = useCallback(() => {
+    if (open.current) finish(open.current.orderId)
+  }, [finish])
+
+  /* The buyer closed PayPal's window: nothing was taken. Back to the form, with a fresh request for next time. */
+  const abandon = useCallback(() => {
+    const current = open.current
+    open.current = null
+    if (current) cancelPayment(current.paymentId).catch(() => {})
+    key.current = crypto.randomUUID()
+    setPayment(null)
+    setProblem(null)
+    setPhase('form')
+  }, [])
+
+  /* Something went wrong inside PayPal's window. A problem already shown from begin() is not shown twice. */
+  const fail = useCallback((error) => {
+    if (error?.reported || error?.message === 'finished') return
+    setProblem({ code: 'paypal_error', message: 'PayPal could not complete that. Try again.' })
+  }, [])
+
+  const explain = useCallback((message) => setProblem({ code: 'check', message }), [])
 
   /* After a failed payment: back to the form with everything kept, ready for another attempt. The demo control goes
      back to approving, since a retry is meant to go well. */
@@ -160,9 +277,11 @@ export function useCheckout(product) {
     place,
     methods,
     method,
+    ready,
+    viaPaypal,
     chooseCountry,
-    chooseMethod: setMethodId,
-    local,
+    chooseMethod,
+    price,
     contact,
     editContact,
     useNewBuyer,
@@ -175,6 +294,12 @@ export function useCheckout(product) {
     payment,
     problem,
     pay,
+    begin,
+    finish,
+    retryCapture,
+    abandon,
+    fail,
+    explain,
     tryAgain,
   }
 }

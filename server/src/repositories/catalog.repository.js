@@ -5,7 +5,7 @@ export function createCatalogRepository({ db }) {
   return {
     async findMerchant(slug) {
       const [row] = await db.query(
-        "select id, slug, name, tagline, country_code from public.merchants where slug = $1 and status = 'active'",
+        "select id, slug, name, tagline, country_code, payout_email from public.merchants where slug = $1 and status = 'active'",
         [slug],
       )
       return row ? camelize(row) : null

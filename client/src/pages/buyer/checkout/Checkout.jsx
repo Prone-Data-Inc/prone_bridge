@@ -11,15 +11,17 @@ import { useSession } from '@/stores/session.js'
 import { Button } from '@/ui/Button.jsx'
 import { Input, Select } from '@/ui/Field.jsx'
 import { EmptyState, Skeleton, Spinner } from '@/ui/States.jsx'
+import CardPay from './CardPay.jsx'
 import MethodDetails from './MethodDetails.jsx'
 import MethodList from './MethodList.jsx'
 import OrderSummary from './OrderSummary.jsx'
-import { Failed, Paid } from './Result.jsx'
+import PaypalPay from './PaypalPay.jsx'
+import { Failed, Paid, Pending } from './Result.jsx'
 import { useCheckout } from './useCheckout.js'
 import Waiting from './Waiting.jsx'
 import s from './Checkout.module.css'
 
-function Problem({ problem, onOpen, onNewBuyer }) {
+function Problem({ problem, onOpen, onNewBuyer, onRetry }) {
   const owned = problem.status === 409 && /already own/i.test(problem.message)
   return (
     <div className={s.problem} role="alert">
@@ -36,6 +38,13 @@ function Problem({ problem, onOpen, onNewBuyer }) {
             </button>
           </p>
         )}
+        {problem.retry && (
+          <p className={s.problemActions}>
+            <button type="button" onClick={onRetry}>
+              Confirm the payment again
+            </button>
+          </p>
+        )}
       </div>
     </div>
   )
@@ -47,13 +56,12 @@ function Flow({ product }) {
   const unlocked = useLearner((state) => state.courses.some((course) => course.id === product.id))
   const countries = useCatalog((state) => state.countries)
   const checkout = useCheckout(product)
-  const { place, method, local, contact, phase, problem } = checkout
+  const { place, method, price, viaPaypal, contact, phase, problem } = checkout
 
   /* Owning the course only matters for the person who owns it. With a new demo buyer in the form, it can be bought again. */
   const owned = unlocked && contact.email.trim().toLowerCase() === (buyer?.email ?? '').toLowerCase()
 
-  const total =
-    place && local != null ? formatMinor(local, { currency: place.currency, minorUnits: place.minorUnits }) : null
+  const total = price ? formatMinor(price.amount, price) : null
 
   const submit = (event) => {
     event.preventDefault()
@@ -68,10 +76,20 @@ function Flow({ product }) {
         <h2 className={s.stateTitle}>Starting your payment</h2>
       </section>
     )
+  } else if (phase === 'confirming') {
+    main = (
+      <section className={s.waiting} aria-live="polite" aria-busy="true">
+        <Spinner size={32} label="Confirming your payment" />
+        <h2 className={s.stateTitle}>Confirming your payment</h2>
+        <p className={s.stateText}>This takes a moment.</p>
+      </section>
+    )
   } else if (phase === 'waiting') {
     main = <Waiting payment={checkout.payment} place={place} phone={checkout.phone} />
   } else if (phase === 'paid') {
     main = <Paid payment={checkout.payment} place={place} />
+  } else if (phase === 'pending') {
+    main = <Pending payment={checkout.payment} />
   } else if (phase === 'failed') {
     main = <Failed payment={checkout.payment} onRetry={checkout.tryAgain} />
   } else if (owned && !problem) {
@@ -140,7 +158,12 @@ function Flow({ product }) {
           <h2 id="method-title" className={s.sectionTitle}>
             Payment method
           </h2>
-          <MethodList methods={checkout.methods} selectedId={method?.id} onChoose={checkout.chooseMethod} />
+          <MethodList
+            methods={checkout.methods}
+            selectedId={method?.id}
+            onChoose={checkout.chooseMethod}
+            ready={checkout.ready}
+          />
           <MethodDetails
             method={method}
             phone={checkout.phone}
@@ -155,16 +178,25 @@ function Flow({ product }) {
             problem={problem}
             onOpen={() => go('buyer', 'course', product.slug)}
             onNewBuyer={checkout.useNewBuyer}
+            onRetry={checkout.retryCapture}
           />
         )}
 
         <div className={s.pay}>
-          <Button type="submit" variant="primary" size="lg" className={s.payButton} disabled={!checkout.valid}>
-            {total ? `Pay ${total}` : 'Pay'}
-          </Button>
+          {method?.kind === 'card' && <CardPay checkout={checkout} total={total} />}
+          {method?.kind === 'paypal' && <PaypalPay checkout={checkout} />}
+          {!viaPaypal && (
+            <Button type="submit" variant="primary" size="lg" className={s.payButton} disabled={!checkout.valid}>
+              {total ? `Pay ${total}` : 'Pay'}
+            </Button>
+          )}
           <p className={s.payNote}>
             <LockSimple size={14} aria-hidden />
-            {method?.simulated ? 'Simulated payment. No money moves.' : 'Choose a payment method.'}
+            {method?.simulated
+              ? 'Simulated payment. No money moves.'
+              : method
+                ? 'PayPal sandbox payment. No money moves.'
+                : 'Choose a payment method.'}
           </p>
         </div>
       </form>
@@ -173,7 +205,7 @@ function Flow({ product }) {
 
   return (
     <div className={s.page}>
-      <OrderSummary product={product} place={place} local={local} />
+      <OrderSummary product={product} place={place} price={price} viaPaypal={viaPaypal} />
       <main className={s.main}>
         <div className={s.mainInner}>{main}</div>
       </main>

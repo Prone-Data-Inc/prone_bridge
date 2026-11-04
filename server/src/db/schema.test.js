@@ -48,6 +48,7 @@ describe('migrations', () => {
       'payouts',
       'products',
       'schema_migrations',
+      'webhook_events',
     ])
   })
 

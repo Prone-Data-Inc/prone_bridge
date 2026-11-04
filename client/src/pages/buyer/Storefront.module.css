@@ -14,7 +14,7 @@
 
 .title {
   max-width: 14ch;
-  font-size: clamp(40px, 6.4vw, 72px);
+  font-size: clamp(40px, calc(6.4vw / var(--zoom)), 72px);
   font-weight: var(--fw-semibold);
   letter-spacing: -0.035em;
   line-height: 1.02;
