@@ -1,0 +1,12 @@
+# docker compose up --build
+# The app is then on http://localhost:8000. Settings come from .env when it exists (copy .env.example).
+services:
+  app:
+    build: .
+    image: pronebridge
+    ports:
+      - '8000:8000'
+    env_file:
+      - path: .env
+        required: false
+    restart: unless-stopped

@@ -1,0 +1,21 @@
+# Dependencies and builds
+node_modules/
+client/dist/
+coverage/
+.vercel/
+
+# Secrets: only .env.example is ever committed
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json

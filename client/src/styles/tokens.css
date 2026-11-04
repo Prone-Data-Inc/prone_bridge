@@ -1,0 +1,101 @@
+/* Design tokens. Scale and structure follow Sanaa Studio (type, spacing, radii, motion, light and dark themes);
+   the palette is ProneBridge blue. Step 3 adds the component tokens. */
+
+:root {
+  /* Brand */
+  --blue: #0070e0;
+  --blue-deep: #003087;
+  --blue-sky: #009cde;
+  --ink: #0b1b3f;
+
+  /* Type */
+  --font: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 24px;
+  --fs-2xl: 32px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  /* Shape and spacing */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-full: 999px;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 28px;
+  --s-8: 40px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-io: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --dur: 0.2s;
+}
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f5f8fc;
+  --elevated: #ffffff;
+  --fill: rgba(11, 27, 63, 0.04);
+  --fill-hover: rgba(11, 27, 63, 0.07);
+  --fill-strong: rgba(11, 27, 63, 0.11);
+  --border: rgba(11, 27, 63, 0.09);
+  --border-strong: rgba(11, 27, 63, 0.16);
+  --text: #0b1b3f;
+  --text-2: rgba(11, 27, 63, 0.7);
+  --text-3: rgba(11, 27, 63, 0.58);
+  --accent: #0070e0;
+  --accent-hover: #005cb8;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(0, 112, 224, 0.1);
+  --success: #167049;
+  --warning: #a86f00;
+  --danger: #cc2f45;
+  --success-soft: rgba(22, 112, 73, 0.12);
+  --warning-soft: rgba(227, 160, 8, 0.16);
+  --danger-soft: rgba(204, 47, 69, 0.1);
+  --shadow-pop: 0 12px 32px rgba(11, 27, 63, 0.12), 0 0 0 1px var(--border);
+  --glow-a: rgba(0, 112, 224, 0.16);
+  --glow-b: rgba(0, 156, 222, 0.14);
+  --logo-mark: #0070e0;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b1426;
+  --surface: #111c33;
+  --elevated: #16233f;
+  --fill: rgba(255, 255, 255, 0.06);
+  --fill-hover: rgba(255, 255, 255, 0.09);
+  --fill-strong: rgba(255, 255, 255, 0.14);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.17);
+  --text: #f1f5fc;
+  --text-2: rgba(241, 245, 252, 0.72);
+  --text-3: rgba(241, 245, 252, 0.58);
+  --accent: #4da3ff;
+  --accent-hover: #7bbcff;
+  --accent-contrast: #05172e;
+  --accent-soft: rgba(77, 163, 255, 0.15);
+  --success: #4cc790;
+  --warning: #e8b13a;
+  --danger: #f06a7c;
+  --success-soft: rgba(76, 199, 144, 0.14);
+  --warning-soft: rgba(232, 177, 58, 0.14);
+  --danger-soft: rgba(240, 106, 124, 0.14);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
+  --glow-a: rgba(77, 163, 255, 0.16);
+  --glow-b: rgba(0, 156, 222, 0.12);
+  --logo-mark: #4da3ff;
+}

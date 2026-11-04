@@ -1,0 +1,6 @@
+#!/bin/sh
+# Blocks a commit that contains a secret. Installed by `npm install` (scripts/setup-hooks.js).
+node scripts/scan-secrets.js --staged || {
+  echo "Commit blocked. Remove the secret, then commit again."
+  exit 1
+}

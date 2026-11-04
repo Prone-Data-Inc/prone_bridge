@@ -1,0 +1,59 @@
+{
+  "name": "pronebridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One payment layer for Africa. PayPal and AI behind a single checkout.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "imports": {
+    "#shared/*": "./shared/src/*",
+    "#server/*": "./server/src/*"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,cyan \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "node --watch server/src/index.js",
+    "dev:client": "vite --config client/vite.config.js",
+    "build": "vite build --config client/vite.config.js",
+    "start": "node server/src/index.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "brand": "node brand/generate.js",
+    "scan:secrets": "node scripts/scan-secrets.js",
+    "scan:history": "node scripts/scan-secrets.js --history",
+    "check": "npm run lint && npm run format:check && npm run test && npm run build && npm run scan:secrets",
+    "prepare": "node scripts/setup-hooks.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.6",
+    "hono": "^4.13.16",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/outfit": "^5.3.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "@testing-library/react": "^16.3.3",
+    "@vitejs/plugin-react": "^6.2.1",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "fontkit": "^2.0.4",
+    "globals": "^17.14.0",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.9.10",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sharp": "^0.35.5",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}

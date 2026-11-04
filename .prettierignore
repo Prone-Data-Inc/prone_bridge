@@ -1,0 +1,7 @@
+node_modules
+client/dist
+brand/output
+coverage
+package-lock.json
+shared/src/brand/wordmark.js
+.vercel

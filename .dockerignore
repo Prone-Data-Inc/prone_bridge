@@ -1,0 +1,14 @@
+node_modules
+client/dist
+coverage
+.git
+.github
+.githooks
+.vercel
+.env
+.env.*
+!.env.example
+brand/output
+*.log
+Dockerfile
+docker-compose.yml
