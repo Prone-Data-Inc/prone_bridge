@@ -14,12 +14,14 @@ Everything simulated is labeled in the app and listed here.
 
 - PayPal runs in the PayPal sandbox. No real money moves.
 - Local payment methods, such as mobile money and bank transfer, are simulations with prefilled test data. The app says so wherever they appear.
+- Exchange rates for local prices are indicative and simulated.
+- The demo data is invented: five fictional merchants, their courses, buyers, prices, fees and ninety days of traffic.
 - No bank, wallet or payment company is integrated, and none is named as a partner.
 - A buyer's country, name and nationality are never used to judge risk.
 
 ## Status
 
-Step 1 of 10: the foundation. The checkout, PayPal, the dashboards and the AI arrive step by step.
+Step 2 of 10: the data layer. The checkout, PayPal, the dashboards and the AI arrive step by step.
 
 ## Run it
 
@@ -32,7 +34,28 @@ npm run dev
 
 The web app is on http://localhost:5173 and the API on http://localhost:8000/api/health.
 
-Settings live in a `.env` file. Copy `.env.example` to `.env` and fill in what each step asks for. Nothing is required to start.
+Settings live in a `.env` file. Copy `.env.example` to `.env` and fill in what each step asks for.
+
+## The database
+
+ProneBridge keeps its data in Supabase (Postgres).
+
+1. Create a Supabase project and copy its connection string into `DATABASE_URL` in `.env`.
+2. Download the project's CA certificate (Project settings, Database, SSL configuration) and save it as `certs/supabase-ca.crt`. The connection is always verified.
+3. Put the project URL and the **anon** key in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Never put the service role key anywhere in this app. The build stops if it finds one in a `VITE_` variable.
+4. Run:
+
+```bash
+npm run db:migrate
+npm run db:seed
+npm run db:check
+```
+
+`db:check` proves the project is ready: the connection is verified, every table has row level security, the public data API returns nothing, and a change reaches the browser as a live signal.
+
+Live updates travel as small signals on a public channel. They carry ids and a status, never a name, an email or an amount.
+
+On Vercel, use the transaction pooler connection string for `DATABASE_URL` and paste the certificate text into `DATABASE_SSL_CA`.
 
 ## Run it with Docker
 
@@ -57,6 +80,10 @@ Import the repository. `vercel.json` does the rest: the web app is built to `cli
 | `npm run lint`         | Checks the code                                          |
 | `npm run check`        | Lint, format, tests, build and secret scan               |
 | `npm run brand`        | Regenerates the logo, icons and social card              |
+| `npm run db:migrate`   | Applies the database migrations                          |
+| `npm run db:seed`      | Writes the demo data into an empty database              |
+| `npm run db:reset`     | Erases and reseeds (add `-- --yes` to confirm)           |
+| `npm run db:check`     | Checks a Supabase project end to end                     |
 | `npm run scan:secrets` | Looks for keys in the files                              |
 | `npm run scan:history` | Looks for keys in every commit                           |
 
@@ -65,8 +92,9 @@ Import the repository. `vercel.json` does the rest: the web app is built to `cli
 ```
 api/       Vercel entry, one function for the whole API
 client/    React web app (Vite)
-server/    API on Hono, in layers: routes, controllers, services
-shared/    Brand and constants used by both sides
+server/    API on Hono, in layers: routes, controllers, services, repositories
+           db/migrations holds the SQL, src/db the migration runner and the seed
+shared/    Brand, money and key checks used by both sides
 brand/     Logo and icon generator
 scripts/   Secret scanner and git hooks
 ```
@@ -76,6 +104,8 @@ The API is one web-standard app (`server/src/app.js`). Vercel, Node and Docker a
 ## Keys and safety
 
 Keys live in environment variables only. `.env` is never committed. A pre-commit hook scans every commit for secrets, and `npm run scan:history` checks the whole history.
+
+Every table has row level security and no policy, so Supabase's public data API returns nothing. Only the API server reads and writes, through its own database connection.
 
 ## License
 

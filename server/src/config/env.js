@@ -1,6 +1,7 @@
 /* Environment, read once and validated. Every integration key is optional: a missing key switches that feature off
    and the health route says so, it never crashes the app. A malformed value (a port that is not a number, PayPal set
-   to anything but sandbox) fails fast with a readable message. */
+   to anything but sandbox) fails fast with a readable message.
+   The app reaches the database with DATABASE_URL only. It never needs the Supabase service role key. */
 import { z } from 'zod'
 
 const text = z.string().default('')
@@ -17,10 +18,12 @@ const schema = z.object({
   SERVE_CLIENT: flag,
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info'),
 
-  SUPABASE_URL: text,
-  SUPABASE_ANON_KEY: text,
-  SUPABASE_SERVICE_ROLE_KEY: text,
+  /* Postgres on Supabase. Local and migration runs can use the direct address; Vercel needs the transaction pooler. */
   DATABASE_URL: text,
+  /* Supabase's CA certificate, as PEM text or as a path to the file. The connection is always verified. */
+  DATABASE_SSL_CA: text,
+  DATABASE_SSL_CA_FILE: text,
+  DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(20).optional(),
 
   /* This project never talks to live PayPal. */
   PAYPAL_ENV: z.literal('sandbox').default('sandbox'),
@@ -55,16 +58,18 @@ export function loadEnv(source = process.env) {
   return Object.freeze({
     nodeEnv: e.NODE_ENV,
     isProduction: e.NODE_ENV === 'production',
+    /* Vercel sets VERCEL on every function: each instance keeps a single database connection there. */
+    isServerless: Boolean(source.VERCEL),
     host: e.HOST,
     port: e.PORT,
     appUrl: e.APP_URL,
     serveClient: e.SERVE_CLIENT,
     logLevel: e.LOG_LEVEL,
-    supabase: Object.freeze({
-      url: e.SUPABASE_URL,
-      anonKey: e.SUPABASE_ANON_KEY,
-      serviceRoleKey: e.SUPABASE_SERVICE_ROLE_KEY,
-      databaseUrl: e.DATABASE_URL,
+    database: Object.freeze({
+      url: e.DATABASE_URL,
+      sslCa: e.DATABASE_SSL_CA,
+      sslCaFile: e.DATABASE_SSL_CA_FILE,
+      poolMax: e.DATABASE_POOL_MAX,
     }),
     paypal: Object.freeze({
       env: e.PAYPAL_ENV,
@@ -78,7 +83,7 @@ export function loadEnv(source = process.env) {
     }),
     /* A key being present is not a live connection. Each integration reports its real status once it exists. */
     integrations: Object.freeze({
-      database: Boolean(e.SUPABASE_URL && e.SUPABASE_SERVICE_ROLE_KEY),
+      database: Boolean(e.DATABASE_URL),
       paypal: Boolean(e.PAYPAL_CLIENT_ID && e.PAYPAL_CLIENT_SECRET),
       ai: Boolean(e.OPENAI_API_KEY),
     }),

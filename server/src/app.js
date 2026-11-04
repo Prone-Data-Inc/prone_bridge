@@ -5,6 +5,7 @@ import { Hono } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
 import { getEnv } from '#server/config/env.js'
 import { createContainer } from '#server/container.js'
+import { createDbFromEnv } from '#server/db/client.js'
 import { createLogger } from '#server/lib/logger.js'
 import { payloadTooLarge } from '#server/lib/errors.js'
 import { errorBody } from '#server/lib/response.js'
@@ -17,8 +18,8 @@ import { mountClient } from '#server/static.js'
 
 const MAX_BODY_BYTES = 1024 * 1024
 
-export function createApp({ env = getEnv(), logger = defaultLogger(env) } = {}) {
-  const container = createContainer({ env })
+export function createApp({ env = getEnv(), logger = defaultLogger(env), db = createDbFromEnv(env, logger) } = {}) {
+  const container = createContainer({ env, db })
   const api = new Hono()
 
   api.use('*', requestContext({ logger }))

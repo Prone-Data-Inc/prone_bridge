@@ -46,6 +46,22 @@ describe('App launch screen', () => {
     expect(within(row('AI')).getByText('Not set up')).toBeTruthy()
   })
 
+  it('shows the database as connected, or unreachable when it cannot be reached', async () => {
+    vi.stubGlobal('fetch', () =>
+      reply(health({ database: 'connected', paypal: 'not_configured', ai: 'not_configured' })),
+    )
+    const { unmount } = render(<App />)
+    await waitFor(() => expect(within(row('Database')).getByText('Connected')).toBeTruthy())
+    unmount()
+
+    vi.stubGlobal('fetch', () =>
+      reply(health({ database: 'unreachable', paypal: 'not_configured', ai: 'not_configured' })),
+    )
+    render(<App />)
+    await waitFor(() => expect(within(row('Database')).getByText('Unreachable')).toBeTruthy())
+    expect(within(row('Server')).getByText('Online')).toBeTruthy()
+  })
+
   it('shows the server as offline, and tries again on request', async () => {
     const fetch = vi
       .fn()

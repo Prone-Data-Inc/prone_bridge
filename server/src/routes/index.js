@@ -2,11 +2,13 @@
    under /api is never mistaken for a page of the web app. */
 import { Hono } from 'hono'
 import { notFound } from '#server/lib/errors.js'
+import { catalogRoutes } from './catalog.routes.js'
 import { healthRoutes } from './health.routes.js'
 
 export function createRoutes({ controllers }) {
   const routes = new Hono()
   routes.route('/health', healthRoutes(controllers))
+  routes.route('/catalog', catalogRoutes(controllers))
   routes.all('*', () => {
     throw notFound()
   })

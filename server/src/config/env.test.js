@@ -14,7 +14,7 @@ describe('loadEnv', () => {
   })
 
   it('treats blank values from a .env file as not set', () => {
-    const env = loadEnv({ PORT: '', PAYPAL_ENV: '', SUPABASE_URL: '' })
+    const env = loadEnv({ PORT: '', PAYPAL_ENV: '', DATABASE_URL: '' })
     expect(env.port).toBe(8000)
     expect(env.paypal.env).toBe('sandbox')
   })
@@ -22,10 +22,25 @@ describe('loadEnv', () => {
   it('turns an integration on only when all of its keys exist', () => {
     expect(loadEnv({ PAYPAL_CLIENT_ID: 'id' }).integrations.paypal).toBe(false)
     expect(loadEnv({ PAYPAL_CLIENT_ID: 'id', PAYPAL_CLIENT_SECRET: 'secret' }).integrations.paypal).toBe(true)
-    expect(
-      loadEnv({ SUPABASE_URL: 'https://x.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'key' }).integrations.database,
-    ).toBe(true)
+    expect(loadEnv({ DATABASE_URL: 'postgresql://u:p@db.example.com:5432/postgres' }).integrations.database).toBe(true)
     expect(loadEnv({ OPENAI_API_KEY: 'key' }).integrations.ai).toBe(true)
+  })
+
+  it('reads the database settings, and keeps one connection on Vercel', () => {
+    const env = loadEnv({
+      DATABASE_URL: 'postgresql://u:p@db.example.com:5432/postgres',
+      DATABASE_SSL_CA_FILE: 'certs/ca.crt',
+      DATABASE_POOL_MAX: '3',
+      VERCEL: '1',
+    })
+    expect(env.database).toEqual({
+      url: 'postgresql://u:p@db.example.com:5432/postgres',
+      sslCa: '',
+      sslCaFile: 'certs/ca.crt',
+      poolMax: 3,
+    })
+    expect(env.isServerless).toBe(true)
+    expect(loadEnv({}).isServerless).toBe(false)
   })
 
   it('reads the port and the serve flag', () => {

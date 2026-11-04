@@ -28,6 +28,7 @@ export default defineConfig([
       'scripts/**/*.js',
       '*.config.js',
       'client/vite.config.js',
+      'client/vite-plugins/**/*.js',
     ],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.node },

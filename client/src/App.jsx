@@ -18,9 +18,11 @@ function describe(key, { status, data }) {
   if (status === 'loading') return { text: 'Checking', tone: 'idle' }
   if (status === 'error') return key === 'server' ? { text: 'Offline', tone: 'bad' } : { text: 'Unknown', tone: 'idle' }
   if (key === 'server') return { text: 'Online', tone: 'good' }
-  return data.integrations[key] === 'configured'
-    ? { text: 'Configured', tone: 'good' }
-    : { text: 'Not set up', tone: 'idle' }
+  const value = data.integrations[key]
+  if (value === 'connected') return { text: 'Connected', tone: 'good' }
+  if (value === 'configured') return { text: 'Configured', tone: 'good' }
+  if (value === 'unreachable') return { text: 'Unreachable', tone: 'bad' }
+  return { text: 'Not set up', tone: 'idle' }
 }
 
 const ICONS = { good: CheckCircle, bad: WarningCircle, idle: CircleDashed }
