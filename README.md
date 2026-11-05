@@ -165,7 +165,7 @@ Settings live in a `.env` file. Copy `.env.example` to `.env` and fill in what e
 ProneBridge keeps its data in Supabase (Postgres).
 
 1. Create a Supabase project and copy its connection string into `DATABASE_URL` in `.env`.
-2. Download the project's CA certificate (Project settings, Database, SSL configuration) and save it as `certs/supabase-ca.crt`. The connection is always verified.
+2. The connection is always verified. The app carries Supabase's public root certificate and uses it for Supabase hosts, so there is nothing to download. To use your own, save the project's CA certificate (Project settings, Database, SSL configuration) as `certs/supabase-ca.crt`, or put its text in `DATABASE_SSL_CA`.
 3. Put the project URL and the **anon** key in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Never put the service role key anywhere in this app. The build stops if it finds one in a `VITE_` variable.
 4. Run:
 
@@ -179,7 +179,7 @@ npm run db:check
 
 Live updates travel as small signals on a public channel. They carry ids and a status, never a name, an email or an amount.
 
-On Vercel, use the transaction pooler connection string for `DATABASE_URL` and paste the certificate text into `DATABASE_SSL_CA`.
+On Vercel, use the transaction pooler connection string for `DATABASE_URL`. No certificate setting is needed.
 
 ## PayPal
 
@@ -262,7 +262,7 @@ The app is then on http://localhost:8000.
 
 ## Deploy on Vercel
 
-Import the repository. `vercel.json` does the rest: the web app is built to `client/dist`, the API runs as one function, `api/index.js`, with room to finish a long scenario, and the security headers are set. Add the variables from `.env.example` in the project settings, with three differences from your local `.env`: `NODE_ENV=production`, `DATABASE_URL` is the Supabase transaction pooler string (port 6543, not the direct address, which Vercel cannot reach), and `DATABASE_SSL_CA` holds the certificate text (leave `DATABASE_SSL_CA_FILE` out, since the `certs` folder is not in the repository). The install step keeps the build tools even when `NODE_ENV=production`. Open `/api/health` on the deployed app: it says `connected` for the database when all of this is right. Then run the migrations and the seed once against the same database, or open the app and press Reset in the Demo panel.
+Import the repository. `vercel.json` does the rest: the web app is built to `client/dist`, the API runs as one function, `api/index.js`, with room to finish a long scenario, and the security headers are set. Add the variables from `.env.example` in the project settings, with two differences from your local `.env`: `NODE_ENV=production`, and `DATABASE_URL` is the Supabase transaction pooler string (port 6543, not the direct address, which Vercel cannot reach). Leave `DATABASE_SSL_CA_FILE` empty, since the `certs` folder is not in the repository. The install step keeps the build tools even when `NODE_ENV=production`. Open `/api/health` on the deployed app: it says `connected` for the database when all of this is right. Then run the migrations and the seed once against the same database, or open the app and press Reset in the Demo panel.
 
 ## Scripts
 
