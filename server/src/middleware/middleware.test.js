@@ -59,8 +59,13 @@ describe('error handler', () => {
 })
 
 describe('rate limit', () => {
-  function limited({ max = 2, windowMs = 1000, clock }) {
+  /* trustProxy: whether the test plays a proxy that wrote x-forwarded-for. */
+  function limited({ max = 2, windowMs = 1000, clock, trustProxy = true }) {
     const app = new Hono()
+    app.use('*', async (c, next) => {
+      c.set('trustProxy', trustProxy)
+      await next()
+    })
     app.use('*', rateLimit({ max, windowMs, now: () => clock.time }))
     app.get('/', (c) => c.text('ok'))
     app.onError(createErrorHandler({ logger: silent }))
@@ -84,6 +89,22 @@ describe('rate limit', () => {
     expect((await app.request('/', from('1.1.1.1'))).status).toBe(200)
     expect((await app.request('/', from('2.2.2.2'))).status).toBe(200)
     expect((await app.request('/', from('1.1.1.1'))).status).toBe(429)
+  })
+
+  it('does not believe a typed x-forwarded-for unless a trusted proxy wrote it, so a new address cannot dodge the limit', async () => {
+    const app = limited({ max: 1, clock: { time: 0 }, trustProxy: false })
+    expect((await app.request('/', from('1.1.1.1'))).status).toBe(200)
+    expect((await app.request('/', from('2.2.2.2'))).status).toBe(429)
+    expect((await app.request('/', from('3.3.3.3'))).status).toBe(429)
+  })
+
+  it('believes nothing without a request context at all', async () => {
+    const app = new Hono()
+    app.use('*', rateLimit({ max: 1, now: () => 0 }))
+    app.get('/', (c) => c.text('ok'))
+    app.onError(createErrorHandler({ logger: silent }))
+    expect((await app.request('/', from('1.1.1.1'))).status).toBe(200)
+    expect((await app.request('/', from('2.2.2.2'))).status).toBe(429)
   })
 
   it('starts a new window after the time has passed', async () => {

@@ -3,6 +3,7 @@
 import { existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { serveStatic } from '@hono/node-server/serve-static'
+import { CSP } from '#server/lib/csp.js'
 import { securityHeaders } from '#server/middleware/security.js'
 
 const DIST = join(import.meta.dirname, '..', '..', 'client', 'dist')
@@ -16,8 +17,12 @@ export function mountClient(app, { logger, dist = DIST } = {}) {
   /* serveStatic reads paths relative to the working directory. */
   const root = relative(process.cwd(), dist).replaceAll('\\', '/') || '.'
 
-  /* On Vercel these headers come from vercel.json. A content security policy joins them once PayPal's origins are known. */
+  /* On Vercel these headers come from vercel.json, which carries the same policy (a test keeps the two equal). */
   app.use('/*', securityHeaders())
+  app.use('/*', async (c, next) => {
+    await next()
+    c.header('Content-Security-Policy', CSP)
+  })
 
   /* Set after the file is served: serveStatic's own onFound hook runs too late to change the response. */
   app.use('/*', async (c, next) => {

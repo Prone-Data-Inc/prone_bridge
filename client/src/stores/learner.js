@@ -8,15 +8,18 @@ import { useSession } from '@/stores/session.js'
 export const useLearner = create((set, get) => ({
   courses: [],
   loaded: false,
+  /* Why the last load failed, until one works. What is shown is kept, so a page can say so only when it has nothing. */
+  error: null,
 
   async load() {
     const buyer = useSession.getState().buyer
-    if (!buyer) return set({ courses: [], loaded: true })
+    if (!buyer) return set({ courses: [], loaded: true, error: null })
     try {
       const { courses } = await listCourses(buyer.id)
-      set({ courses, loaded: true })
-    } catch {
+      set({ courses, loaded: true, error: null })
+    } catch (error) {
       /* keep what is shown, try again at the next signal */
+      set({ error: error.message })
     }
   },
 

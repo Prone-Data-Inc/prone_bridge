@@ -210,7 +210,17 @@ describe('buyer checkout', () => {
       expect((await pay({ idempotencyKey: 'abc' })).status).toBe(400)
       expect((await pay({ country: 'ci' })).status).toBe(400)
       expect((await post('/api/checkout/payments', { ...order(), product: undefined })).status).toBe(400)
-      expect((await call('/api/checkout/payments', { method: 'POST', body: 'nope' })).status).toBe(400)
+      expect(
+        (
+          await call('/api/checkout/payments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: 'nope',
+          })
+        ).status,
+      ).toBe(400)
+      /* a body that does not say it is JSON is not read at all */
+      expect((await call('/api/checkout/payments', { method: 'POST', body: JSON.stringify(order()) })).status).toBe(415)
     })
 
     it('does not use the buyer country for anything but the methods and the currency', async () => {

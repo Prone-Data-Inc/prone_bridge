@@ -168,11 +168,23 @@ describe('Method Match in the checkout', () => {
     expect(screen.queryByText('Best match first')).toBeNull()
   })
 
-  it('puts a method Method Match does not know after the ones it does', async () => {
+  it('shows only what Method Match lists, since it only lists what is open now', async () => {
+    /* a method taken down since the page loaded is still in the page's list, but not in Method Match's */
     api.getMethodMatch.mockResolvedValue(matched('CI', ['card', 'mobile_money']))
     show()
-    await waitFor(() => expect(rows()[0].textContent).toMatch(/^Card/))
-    expect(order()).toEqual(['Card', 'Mobile money', 'Cash voucher', 'PayPal'])
+    await waitFor(() => expect(order()).toEqual(['Card', 'Mobile money']))
+    expect(screen.queryByRole('radio', { name: /^Cash voucher/ })).toBeNull()
+    expect(screen.queryByRole('radio', { name: /^PayPal/ })).toBeNull()
+  })
+
+  it('shows no method, and says to choose one, when nothing is open in the country', async () => {
+    api.getMethodMatch.mockResolvedValue(matched('CI', []))
+    show()
+    await waitFor(() => expect(api.getMethodMatch).toHaveBeenCalled())
+    await act(async () => {})
+    expect(screen.queryAllByRole('radio')).toHaveLength(0)
+    expect(screen.getByText('Choose a payment method.')).toBeTruthy()
+    expect(payButton().disabled).toBe(true)
   })
 
   it('ignores an answer for a country the buyer already left', async () => {

@@ -2,8 +2,17 @@
    On Vercel the app and the API share one origin, so CORS only matters for local development on two ports. */
 import { cors } from 'hono/cors'
 import { secureHeaders } from 'hono/secure-headers'
+import { OPENER_POLICY } from '#server/lib/csp.js'
 
-export const securityHeaders = () => secureHeaders({ crossOriginResourcePolicy: 'same-site' })
+/* crossOriginOpenerPolicy: Hono's default cuts a page off from the popups it opens, which PayPal needs.
+   xFrameOptions and referrerPolicy: the same as vercel.json says, so the app behaves the same on either server. */
+export const securityHeaders = () =>
+  secureHeaders({
+    crossOriginResourcePolicy: 'same-site',
+    crossOriginOpenerPolicy: OPENER_POLICY,
+    xFrameOptions: 'DENY',
+    referrerPolicy: 'strict-origin-when-cross-origin',
+  })
 
 export function corsFor(env) {
   const allowed = new Set([env.appUrl])

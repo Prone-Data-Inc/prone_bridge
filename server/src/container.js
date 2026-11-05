@@ -5,6 +5,7 @@
 import { createAdminController } from './controllers/admin.controller.js'
 import { createCatalogController } from './controllers/catalog.controller.js'
 import { createCopilotController } from './controllers/copilot.controller.js'
+import { createDemoController } from './controllers/demo.controller.js'
 import { createCheckoutController } from './controllers/checkout.controller.js'
 import { createHealthController } from './controllers/health.controller.js'
 import { createLearnerController } from './controllers/learner.controller.js'
@@ -33,6 +34,7 @@ import { createNotificationService } from './services/notification.service.js'
 import { createPaypalService } from './services/paypal.service.js'
 import { createPayoutService } from './services/payout.service.js'
 import { createRiskService } from './services/risk.service.js'
+import { createScenarioService } from './services/scenario.service.js'
 import { createSellerService } from './services/seller.service.js'
 import { createSettlementService } from './services/settlement.service.js'
 import { createSimulatorService } from './services/simulator.service.js'
@@ -80,6 +82,21 @@ export function createContainer({
   const adminService = db
     ? createAdminService({ db, risk: riskService, payouts: payoutService, ai: aiService, catalogRepository, now })
     : offline()
+  const scenarioService = db
+    ? createScenarioService({
+        db,
+        catalogRepository,
+        checkout: checkoutService,
+        simulator: simulatorService,
+        admin: adminService,
+        payouts: payoutService,
+        match: matchService,
+        risk: riskService,
+        ai: aiService,
+        env,
+        now,
+      })
+    : offline()
   const copilotService = db
     ? createCopilotService({
         db,
@@ -124,6 +141,7 @@ export function createContainer({
       match: matchService,
       admin: adminService,
       copilot: copilotService,
+      demo: scenarioService,
     },
     controllers: {
       health: createHealthController({ healthService }),
@@ -139,6 +157,7 @@ export function createContainer({
       links: createLinkController({ linkService }),
       admin: createAdminController({ adminService }),
       copilot: createCopilotController({ copilotService }),
+      demo: createDemoController({ scenarioService }),
     },
   }
 }

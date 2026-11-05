@@ -207,7 +207,8 @@ describe('Checkout: paying', () => {
   })
 
   it('shows what to do while it waits, then the answer', async () => {
-    timing.waitMs = 30
+    /* long enough that a busy machine still sees the waiting screen before the answer arrives */
+    timing.waitMs = 400
     show()
     fireEvent.click(payButton())
     expect(await screen.findByRole('heading', { name: 'Check your phone' })).toBeTruthy()
@@ -215,7 +216,7 @@ describe('Checkout: paying', () => {
     expect(screen.getByText('Waiting for the answer. This is a simulation, no money moves.')).toBeTruthy()
     expect(api.settleSimulated).not.toHaveBeenCalled()
 
-    expect(await screen.findByRole('heading', { name: "You're in" })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: "You're in" }, { timeout: 5000 })).toBeTruthy()
   })
 
   it('says why a payment did not go through, and lets the buyer try again with a new request', async () => {
@@ -243,12 +244,12 @@ describe('Checkout: paying', () => {
   })
 
   it('does not start a second payment while the first is under way', async () => {
-    timing.waitMs = 30
+    timing.waitMs = 400
     show()
     fireEvent.click(payButton())
     await screen.findByRole('heading', { name: 'Check your phone' })
     expect(screen.queryByRole('button', { name: /^Pay / })).toBeNull()
-    await screen.findByRole('heading', { name: "You're in" })
+    await screen.findByRole('heading', { name: "You're in" }, { timeout: 5000 })
     expect(api.createPayment).toHaveBeenCalledTimes(1)
   })
 

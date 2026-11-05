@@ -1,0 +1,22 @@
+.page {
+  display: grid;
+  min-height: 320px;
+  margin: var(--s-7);
+  place-items: center;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.app {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  background: var(--bg);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-3);
+}

@@ -113,15 +113,16 @@ export function useCheckout(product, link = null) {
     }
   }, [placeCode])
 
-  /* The country's methods in Method Match's order, each carrying its entry. A method it does not know goes last. */
+  /* The country's methods in Method Match's order, each carrying its entry. Method Match only lists what is open right now,
+     so a method it does not list (an admin took it down, or the seller turned it off, since this page loaded) is not shown. */
   const methods = useMemo(() => {
     const base = place?.methods ?? []
     if (!match || match.country !== placeCode) return base
     const entries = new Map(match.methods.map((entry) => [entry.id, entry]))
     return base
-      .map((entry, index) => ({ entry, index, match: entries.get(entry.id) }))
-      .sort((a, b) => (a.match?.rank ?? Infinity) - (b.match?.rank ?? Infinity) || a.index - b.index)
-      .map(({ entry, match: found }) => (found ? { ...entry, match: found } : entry))
+      .filter((entry) => entries.has(entry.id))
+      .map((entry) => ({ ...entry, match: entries.get(entry.id) }))
+      .sort((a, b) => a.match.rank - b.match.rank)
   }, [place, match, placeCode])
 
   /* A method can be chosen when it is a simulation, or when it goes through PayPal and PayPal is connected. */

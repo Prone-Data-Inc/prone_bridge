@@ -1,5 +1,6 @@
 /* The courses this buyer has unlocked. */
-import { BookOpen } from '@phosphor-icons/react'
+import { useEffect } from 'react'
+import { BookOpen, WarningCircle } from '@phosphor-icons/react'
 import { cx } from '@/lib/cx.js'
 import { courseFacts } from '@/lib/format.js'
 import { hashFor, useNav } from '@/stores/nav.js'
@@ -13,9 +14,14 @@ import p from './Pdl.module.css'
 import s from './MyCourses.module.css'
 
 export default function MyCourses() {
-  const { courses, loaded } = useLearner()
+  const { courses, loaded, error, load } = useLearner()
   const buyer = useSession((state) => state.buyer)
   const go = useNav((state) => state.go)
+
+  /* The app loads them as it starts. This covers a page opened before that finished or after it failed. */
+  useEffect(() => {
+    if (!loaded) load()
+  }, [loaded, load])
 
   return (
     <PdlFrame>
@@ -25,7 +31,17 @@ export default function MyCourses() {
           <p className={s.subtitle}>{buyer ? `Unlocked by ${buyer.name}.` : 'Courses you buy show up here.'}</p>
         </header>
 
-        {!loaded && <Skeleton height={96} radius={16} />}
+        {!loaded && !error && <Skeleton height={96} radius={16} />}
+
+        {!loaded && error && (
+          <EmptyState
+            icon={WarningCircle}
+            title="We could not load your courses"
+            action={<Button onClick={load}>Try again</Button>}
+          >
+            {error}
+          </EmptyState>
+        )}
 
         {loaded && courses.length === 0 && (
           <EmptyState

@@ -6,6 +6,7 @@ import { adminRoutes } from './admin.routes.js'
 import { catalogRoutes } from './catalog.routes.js'
 import { checkoutRoutes } from './checkout.routes.js'
 import { copilotRoutes } from './copilot.routes.js'
+import { demoRoutes } from './demo.routes.js'
 import { healthRoutes } from './health.routes.js'
 import { learnerRoutes } from './learner.routes.js'
 import { linkRoutes } from './link.routes.js'
@@ -30,6 +31,7 @@ export function createRoutes({ controllers }) {
   routes.route('/seller', sellerRoutes(controllers))
   routes.route('/copilot', copilotRoutes(controllers))
   routes.route('/admin', adminRoutes(controllers))
+  routes.route('/demo', demoRoutes(controllers))
   routes.route('/links', linkRoutes(controllers))
   routes.all('*', () => {
     throw notFound()

@@ -34,9 +34,13 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
-    files: ['client/test/**/*.js'],
+    /* Test helpers and the end to end tests, which run the browser code and the API together. */
+    files: ['client/test/**/*.{js,jsx}', 'client/e2e/**/*.{js,jsx}'],
     extends: [js.configs.recommended],
-    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
   },
   {
     files: ['**/*.test.{js,jsx}'],

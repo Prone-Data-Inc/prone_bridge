@@ -123,7 +123,16 @@ describe('notifications', () => {
     expect((await call('/api/notifications?audience=buyer&buyer=not-an-id')).status).toBe(400)
     expect((await call('/api/notifications?audience=admin&limit=500')).status).toBe(400)
     expect((await post('/api/notifications/read', { audience: 'admin', ids: [] })).status).toBe(400)
-    expect((await call('/api/notifications/read', { method: 'POST', body: 'not json' })).status).toBe(400)
+    expect(
+      (
+        await call('/api/notifications/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: 'not json',
+        })
+      ).status,
+    ).toBe(400)
+    expect((await call('/api/notifications/read', { method: 'POST', body: 'not json' })).status).toBe(415)
     expect((await call('/api/notifications?audience=seller&merchant=nobody')).status).toBe(404)
   })
 

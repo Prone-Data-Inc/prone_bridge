@@ -37,6 +37,12 @@ const schema = z.object({
   OPENAI_MODEL_AGENT: z.string().min(1).default('gpt-6.1-sol'),
   OPENAI_MODEL_FAST: z.string().min(1).default('gpt-6-luna'),
   AI_DAILY_LIMIT: z.coerce.number().int().min(1000).max(50_000_000).default(600_000),
+
+  /* The demo scenarios and the reset. On by default, since this is a demo. Set to false to switch them off. */
+  DEMO_TOOLS: z.enum(['true', 'false']).default('true'),
+  /* Whether x-forwarded-for can be believed. Vercel sets it itself. Behind your own proxy, say so. Without a proxy it
+     is a header anyone can type, so the caller's address is read from the connection instead. */
+  TRUST_PROXY: z.enum(['true', 'false']).optional(),
 })
 
 export class EnvError extends Error {
@@ -86,6 +92,9 @@ export function loadEnv(source = process.env) {
       models: Object.freeze({ agent: e.OPENAI_MODEL_AGENT, fast: e.OPENAI_MODEL_FAST }),
       dailyTokenBudget: e.AI_DAILY_LIMIT,
     }),
+    demoTools: e.DEMO_TOOLS === 'true',
+    /* Believed by default on Vercel and in tests (which have no connection to read). Anywhere else only when asked. */
+    trustProxy: e.TRUST_PROXY ? e.TRUST_PROXY === 'true' : Boolean(source.VERCEL) || e.NODE_ENV === 'test',
     /* A key being present is not a live connection. Each integration reports its real status once it exists. */
     integrations: Object.freeze({
       database: Boolean(e.DATABASE_URL),

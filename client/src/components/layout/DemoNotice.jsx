@@ -1,9 +1,11 @@
-/* The "Demo" pill in the tab strip. It opens a short, honest list of what is real and what is simulated. */
+/* The "Demo" pill in the tab strip. It opens the demo director (scenarios and a reset, when the server has them on) and a
+   short, honest list of what is real and what is simulated. */
 import { useState } from 'react'
 import { Info } from '@phosphor-icons/react'
 import Badge from '@/ui/Badge.jsx'
 import { Button } from '@/ui/Button.jsx'
 import Modal from '@/ui/Modal.jsx'
+import DemoPanel from './DemoPanel.jsx'
 import s from './DemoNotice.module.css'
 
 const REAL = [
@@ -43,7 +45,7 @@ export default function DemoNotice() {
         open={open}
         onClose={() => setOpen(false)}
         title="About this demo"
-        size="sm"
+        size="md"
         footer={
           <Button variant="primary" onClick={() => setOpen(false)}>
             Got it
@@ -51,6 +53,7 @@ export default function DemoNotice() {
         }
       >
         <div className={s.content}>
+          <DemoPanel onClose={() => setOpen(false)} />
           <Group tone="success" title="Real" items={REAL} />
           <Group tone="warning" title="Simulated" items={SIMULATED} />
           <p className={s.note}>No bank, wallet or payment company is integrated or named as a partner.</p>

@@ -1,6 +1,7 @@
 /* Corridors: every payment method in every country, and how healthy it is. The admin marks one as slow or down, and every
    seller that uses it is told. Buyers stop seeing a method that is down, and Method Match puts a slow one lower. */
 import { useState } from 'react'
+import { Path } from '@phosphor-icons/react'
 import { getCorridors, setCorridor } from '@/api/admin.js'
 import { useSellerData } from '@/hooks/useSellerData.js'
 import { formatNumber, percent } from '@/lib/format.js'
@@ -9,7 +10,7 @@ import Badge from '@/ui/Badge.jsx'
 import { Card } from '@/ui/Card.jsx'
 import { Toggle } from '@/ui/Field.jsx'
 import PageHeader from '@/ui/PageHeader.jsx'
-import { Skeleton } from '@/ui/States.jsx'
+import { EmptyState, Skeleton } from '@/ui/States.jsx'
 import p from '../Page.module.css'
 import { usd } from '../seller/format.js'
 import { DataState, RangeSwitch } from '../seller/parts.jsx'
@@ -126,7 +127,12 @@ export default function Corridors() {
           </div>
         }
       >
-        {state.data && (
+        {state.data && all.length === 0 && (
+          <EmptyState icon={Path} title="No corridors yet">
+            Payment methods by country show up here once the demo has data.
+          </EmptyState>
+        )}
+        {state.data && all.length > 0 && (
           <>
             <Card>
               <div className={s.filters}>

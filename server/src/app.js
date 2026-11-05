@@ -31,7 +31,7 @@ export function createApp({
   const container = createContainer({ env, db, logger, paypal, openai, now })
   const api = new Hono()
 
-  api.use('*', requestContext({ logger }))
+  api.use('*', requestContext({ logger, trustProxy: env.trustProxy }))
   api.use('*', securityHeaders())
   api.use('*', corsFor(env))
   api.use(

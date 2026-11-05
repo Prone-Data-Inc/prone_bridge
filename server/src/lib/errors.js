@@ -18,6 +18,8 @@ export const notFound = (message = 'We could not find that.') => new AppError(40
 export const conflict = (message = 'That already happened.') => new AppError(409, 'conflict', message)
 export const payloadTooLarge = (message = 'That request is too large.') =>
   new AppError(413, 'payload_too_large', message)
+export const unsupportedMediaType = (message = 'Send the request as JSON.') =>
+  new AppError(415, 'unsupported_media_type', message)
 export const tooManyRequests = (message = 'Too many requests. Try again shortly.') =>
   new AppError(429, 'rate_limited', message)
 export const unavailable = (message = 'This is not available yet.') => new AppError(503, 'unavailable', message)

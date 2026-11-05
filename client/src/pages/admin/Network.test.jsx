@@ -171,6 +171,13 @@ describe('Corridors', () => {
     expect(screen.getByText('Every corridor is working.')).toBeTruthy()
   })
 
+  it('says so when there are no corridors yet', async () => {
+    api.getCorridors.mockResolvedValue(corridors({ corridors: [], summary: { operational: 0, degraded: 0, down: 0 } }))
+    render(<Corridors />)
+    expect(await screen.findByText('No corridors yet')).toBeTruthy()
+    expect(screen.queryByRole('switch', { name: 'Only show problems' })).toBeNull()
+  })
+
   it('asks for 30 days, then for the period chosen', async () => {
     await show()
     expect(api.getCorridors).toHaveBeenLastCalledWith({ days: 30 })

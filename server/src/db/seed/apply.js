@@ -24,28 +24,30 @@ async function insertRows(t, table, rows) {
   }
 }
 
-/* Counts per table, so a caller can report what was written. */
-export async function applySeed(db, dataset) {
-  return db.tx(async (t) => {
-    for (const [table, trigger] of BROADCAST) await t.exec(`alter table public.${table} disable trigger ${trigger}`)
-    const counts = {}
-    for (const table of SEED_TABLES) {
-      await insertRows(t, table, dataset[table])
-      counts[table] = dataset[table].length
-    }
-    for (const [table, trigger] of BROADCAST) await t.exec(`alter table public.${table} enable trigger ${trigger}`)
-    return counts
-  })
+/* Writes the data set inside a transaction the caller already holds. Counts per table, so a caller can report what was
+   written. */
+export async function writeSeed(t, dataset) {
+  for (const [table, trigger] of BROADCAST) await t.exec(`alter table public.${table} disable trigger ${trigger}`)
+  const counts = {}
+  for (const table of SEED_TABLES) {
+    await insertRows(t, table, dataset[table])
+    counts[table] = dataset[table].length
+  }
+  for (const [table, trigger] of BROADCAST) await t.exec(`alter table public.${table} enable trigger ${trigger}`)
+  return counts
 }
 
-/* Removes all demo data and live data. The schema and the migration history stay. */
+export const applySeed = (db, dataset) => db.tx((t) => writeSeed(t, dataset))
+
+/* The statement that removes all demo data and live data. The schema and the migration history stay. Cascade also empties
+   the tables that point at these ones: risk ratings, payment links, copilot changes and the AI usage count. */
+export const CLEAR_SQL = `truncate table ${[...SEED_TABLES]
+  .reverse()
+  .map((table) => `public.${table}`)
+  .join(', ')} restart identity cascade`
+
 export async function clearData(db) {
-  await db.exec(
-    `truncate table ${[...SEED_TABLES]
-      .reverse()
-      .map((table) => `public.${table}`)
-      .join(', ')} restart identity cascade`,
-  )
+  await db.exec(CLEAR_SQL)
 }
 
 export async function hasData(db) {

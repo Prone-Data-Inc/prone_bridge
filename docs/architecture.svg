@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 990" width="1600" height="990" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+  <title>ProneBridge architecture</title>
+  <desc>A web app with three tabs talks to one API. The API calls PayPal sandbox, OpenAI and Supabase Postgres. The browser also loads PayPal's checkout directly and receives live signals from Supabase.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0070e0"/>
+    </marker>
+    <marker id="arrowGrey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#6b7a99"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="990" fill="#ffffff"/>
+
+  <!-- Header -->
+  <text x="48" y="62" font-size="30" font-weight="700" fill="#0b1b3b">ProneBridge</text>
+  <text x="48" y="94" font-size="17" fill="#55627a">One checkout for every African market, with PayPal and AI behind it.</text>
+
+  <!-- Legend -->
+  <rect x="1112" y="44" width="26" height="16" rx="4" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="1146" y="57" font-size="14" fill="#33415c">Real</text>
+  <rect x="1200" y="44" width="26" height="16" rx="4" fill="#ffffff" stroke="#6b7a99" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="1234" y="57" font-size="14" fill="#33415c">Simulated</text>
+  <rect x="1330" y="44" width="26" height="16" rx="4" fill="#f1ecff" stroke="#7a5ad6" stroke-width="2"/>
+  <text x="1364" y="57" font-size="14" fill="#33415c">AI</text>
+  <text x="1112" y="86" font-size="13" fill="#6b7a99">Everything simulated is labeled in the app.</text>
+
+  <!-- Top lane: live signals from Supabase to the browser -->
+  <path d="M1386 150 V122 H238 V150" fill="none" stroke="#6b7a99" stroke-width="2" stroke-dasharray="3 5" marker-end="url(#arrowGrey)"/>
+  <rect x="560" y="108" width="520" height="26" rx="13" fill="#ffffff"/>
+  <text x="820" y="127" font-size="14" text-anchor="middle" fill="#55627a">Live signals from Supabase Realtime. Ids and a status, never a name or an amount.</text>
+
+  <!-- Browser -->
+  <rect x="48" y="150" width="380" height="700" rx="22" fill="#f5f8ff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="76" y="192" font-size="21" font-weight="700" fill="#0b1b3b">Web app</text>
+  <text x="76" y="216" font-size="14" fill="#55627a">React 19 and Vite. One window, three tabs.</text>
+
+  <rect x="76" y="236" width="104" height="38" rx="10" fill="#0070e0"/>
+  <text x="128" y="260" font-size="15" font-weight="600" text-anchor="middle" fill="#ffffff">Buyer</text>
+  <rect x="188" y="236" width="104" height="38" rx="10" fill="#ffffff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="240" y="260" font-size="15" font-weight="600" text-anchor="middle" fill="#0b1b3b">Seller</text>
+  <rect x="300" y="236" width="104" height="38" rx="10" fill="#ffffff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="352" y="260" font-size="15" font-weight="600" text-anchor="middle" fill="#0b1b3b">Admin</text>
+
+  <rect x="76" y="292" width="328" height="64" rx="14" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="96" y="318" font-size="16" font-weight="700" fill="#0b1b3b">Demo director</text>
+  <text x="96" y="340" font-size="13" fill="#55627a">Eight one-click scenarios and a reset.</text>
+
+  <rect x="76" y="376" width="328" height="136" rx="14" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="96" y="404" font-size="16" font-weight="700" fill="#0b1b3b">PayPal JS SDK v6</text>
+  <text x="96" y="430" font-size="13" fill="#55627a">The PayPal button and the card fields are</text>
+  <text x="96" y="450" font-size="13" fill="#55627a">drawn by PayPal in its own frames.</text>
+  <text x="96" y="476" font-size="13" font-weight="600" fill="#0b1b3b">Card numbers go to PayPal,</text>
+  <text x="96" y="496" font-size="13" font-weight="600" fill="#0b1b3b">never to this app.</text>
+
+  <rect x="76" y="532" width="328" height="86" rx="14" fill="#ffffff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="96" y="560" font-size="16" font-weight="700" fill="#0b1b3b">Live updates</text>
+  <text x="96" y="584" font-size="13" fill="#55627a">Toasts, tab badges and tables change</text>
+  <text x="96" y="602" font-size="13" fill="#55627a">the moment a payment does.</text>
+
+  <rect x="76" y="638" width="328" height="86" rx="14" fill="#ffffff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="96" y="666" font-size="16" font-weight="700" fill="#0b1b3b">Data grids</text>
+  <text x="96" y="690" font-size="13" fill="#55627a">AG Grid Community for payments,</text>
+  <text x="96" y="708" font-size="13" fill="#55627a">customers, transactions and the audit log.</text>
+
+  <rect x="76" y="744" width="328" height="84" rx="14" fill="#ffffff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="96" y="772" font-size="16" font-weight="700" fill="#0b1b3b">Never a blank page</text>
+  <text x="96" y="796" font-size="13" fill="#55627a">Every page has loading, empty and</text>
+  <text x="96" y="814" font-size="13" fill="#55627a">error states, and a way to try again.</text>
+
+  <!-- Browser to API -->
+  <path d="M428 420 H520" fill="none" stroke="#0070e0" stroke-width="3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="474" y="406" font-size="13" font-weight="600" text-anchor="middle" fill="#0070e0">HTTPS</text>
+  <text x="474" y="446" font-size="13" text-anchor="middle" fill="#55627a">JSON</text>
+
+  <!-- API -->
+  <rect x="520" y="150" width="600" height="700" rx="22" fill="#ffffff" stroke="#0070e0" stroke-width="3"/>
+  <text x="548" y="192" font-size="21" font-weight="700" fill="#0b1b3b">ProneBridge API</text>
+  <text x="548" y="216" font-size="14" fill="#55627a">Hono. One web-standard app that runs as a Vercel function, on Node or in Docker.</text>
+
+  <rect x="548" y="238" width="124" height="36" rx="10" fill="#eaf3ff"/>
+  <text x="610" y="261" font-size="14" font-weight="600" text-anchor="middle" fill="#0b1b3b">Routes</text>
+  <rect x="684" y="238" width="124" height="36" rx="10" fill="#eaf3ff"/>
+  <text x="746" y="261" font-size="14" font-weight="600" text-anchor="middle" fill="#0b1b3b">Controllers</text>
+  <rect x="820" y="238" width="124" height="36" rx="10" fill="#eaf3ff"/>
+  <text x="882" y="261" font-size="14" font-weight="600" text-anchor="middle" fill="#0b1b3b">Services</text>
+  <rect x="956" y="238" width="136" height="36" rx="10" fill="#eaf3ff"/>
+  <text x="1024" y="261" font-size="14" font-weight="600" text-anchor="middle" fill="#0b1b3b">Repositories</text>
+  <text x="548" y="298" font-size="13" fill="#6b7a99">Each layer talks only to the one below it. Every input is checked with a schema.</text>
+
+  <!-- Services -->
+  <rect x="548" y="318" width="262" height="96" rx="14" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="566" y="346" font-size="16" font-weight="700" fill="#0b1b3b">Checkout</text>
+  <text x="566" y="370" font-size="13" fill="#55627a">The price comes from the database.</text>
+  <text x="566" y="390" font-size="13" fill="#55627a">One idempotency key per try.</text>
+
+  <rect x="830" y="318" width="262" height="96" rx="14" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="848" y="346" font-size="16" font-weight="700" fill="#0b1b3b">Risk engine</text>
+  <text x="848" y="370" font-size="13" fill="#55627a">Rules score every payment before</text>
+  <text x="848" y="390" font-size="13" fill="#55627a">money moves. Country is never an input.</text>
+
+  <rect x="548" y="430" width="262" height="96" rx="14" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="566" y="458" font-size="16" font-weight="700" fill="#0b1b3b">Method Match</text>
+  <text x="566" y="482" font-size="13" fill="#55627a">The best method per country, from 30</text>
+  <text x="566" y="502" font-size="13" fill="#55627a">days of results. Arithmetic, not AI.</text>
+
+  <rect x="830" y="430" width="262" height="96" rx="14" fill="#f1ecff" stroke="#7a5ad6" stroke-width="2"/>
+  <text x="848" y="458" font-size="16" font-weight="700" fill="#0b1b3b">Seller copilot</text>
+  <text x="848" y="482" font-size="13" fill="#55627a">Reads its own seller's data by tool.</text>
+  <text x="848" y="502" font-size="13" fill="#55627a">Every change waits for a Confirm.</text>
+
+  <rect x="548" y="542" width="262" height="96" rx="14" fill="#ffffff" stroke="#0070e0" stroke-width="2"/>
+  <text x="566" y="570" font-size="16" font-weight="700" fill="#0b1b3b">Payouts</text>
+  <text x="566" y="594" font-size="13" fill="#55627a">One PayPal batch per seller.</text>
+  <text x="566" y="614" font-size="13" fill="#55627a">A retry never pays twice.</text>
+
+  <rect x="830" y="542" width="262" height="96" rx="14" fill="#f1ecff" stroke="#7a5ad6" stroke-width="2"/>
+  <text x="848" y="570" font-size="16" font-weight="700" fill="#0b1b3b">Fraud notes</text>
+  <text x="848" y="594" font-size="13" fill="#55627a">The AI words what the rules found.</text>
+  <text x="848" y="614" font-size="13" fill="#55627a">It never changes a decision.</text>
+
+  <!-- Simulated rail and safety -->
+  <rect x="548" y="662" width="262" height="162" rx="14" fill="#ffffff" stroke="#6b7a99" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="566" y="690" font-size="16" font-weight="700" fill="#0b1b3b">Simulated local rail</text>
+  <text x="566" y="716" font-size="13" fill="#55627a">Mobile money, Bank transfer,</text>
+  <text x="566" y="736" font-size="13" fill="#55627a">USSD and Cash voucher.</text>
+  <text x="566" y="764" font-size="13" fill="#55627a">A demo control approves,</text>
+  <text x="566" y="784" font-size="13" fill="#55627a">declines or times out each one.</text>
+  <text x="566" y="810" font-size="13" font-weight="600" fill="#0b1b3b">Labeled Simulated everywhere.</text>
+
+  <rect x="830" y="662" width="262" height="162" rx="14" fill="#ffffff" stroke="#c4d5f5" stroke-width="2"/>
+  <text x="848" y="690" font-size="16" font-weight="700" fill="#0b1b3b">Safety layer</text>
+  <text x="848" y="716" font-size="13" fill="#55627a">Rate limits, JSON bodies only,</text>
+  <text x="848" y="736" font-size="13" fill="#55627a">a CORS allowlist, a strict CSP.</text>
+  <text x="848" y="764" font-size="13" fill="#55627a">A daily AI budget, an audit log,</text>
+  <text x="848" y="784" font-size="13" fill="#55627a">webhooks checked with PayPal.</text>
+  <text x="848" y="810" font-size="13" font-weight="600" fill="#0b1b3b">Secrets stay on the server.</text>
+
+  <!-- API to the services -->
+  <path d="M1120 250 H1220" fill="none" stroke="#0070e0" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1170" y="236" font-size="13" font-weight="600" text-anchor="middle" fill="#0070e0">SQL</text>
+  <text x="1170" y="272" font-size="13" text-anchor="middle" fill="#55627a">TLS</text>
+
+  <path d="M1120 500 H1220" fill="none" stroke="#7a5ad6" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1170" y="486" font-size="13" font-weight="600" text-anchor="middle" fill="#7a5ad6">Tools</text>
+  <text x="1170" y="522" font-size="13" text-anchor="middle" fill="#55627a">key on server</text>
+
+  <path d="M1120 740 H1220" fill="none" stroke="#0070e0" stroke-width="3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="1170" y="726" font-size="13" font-weight="600" text-anchor="middle" fill="#0070e0">Orders</text>
+  <text x="1170" y="762" font-size="13" text-anchor="middle" fill="#55627a">webhooks</text>
+
+  <!-- Supabase -->
+  <rect x="1220" y="150" width="332" height="200" rx="22" fill="#ffffff" stroke="#0070e0" stroke-width="3"/>
+  <text x="1246" y="192" font-size="21" font-weight="700" fill="#0b1b3b">Supabase Postgres</text>
+  <text x="1246" y="224" font-size="14" fill="#55627a">Row level security on every table,</text>
+  <text x="1246" y="244" font-size="14" fill="#55627a">with no public policy. Only the API</text>
+  <text x="1246" y="264" font-size="14" fill="#55627a">reads and writes.</text>
+  <text x="1246" y="294" font-size="14" fill="#55627a">A database trigger sends the live</text>
+  <text x="1246" y="314" font-size="14" fill="#55627a">signals, with ids and nothing else.</text>
+
+  <!-- OpenAI -->
+  <rect x="1220" y="390" width="332" height="220" rx="22" fill="#f1ecff" stroke="#7a5ad6" stroke-width="3"/>
+  <text x="1246" y="432" font-size="21" font-weight="700" fill="#0b1b3b">OpenAI Responses API</text>
+  <text x="1246" y="464" font-size="14" font-weight="600" fill="#0b1b3b">gpt-6.1-sol</text>
+  <text x="1246" y="484" font-size="14" fill="#55627a">The seller copilot, with 12 strict tools.</text>
+  <text x="1246" y="516" font-size="14" font-weight="600" fill="#0b1b3b">gpt-6-luna</text>
+  <text x="1246" y="536" font-size="14" fill="#55627a">The short notes on held payments.</text>
+  <text x="1246" y="574" font-size="14" font-weight="600" fill="#0b1b3b">It writes. The rules decide.</text>
+
+  <!-- PayPal -->
+  <rect x="1220" y="650" width="332" height="200" rx="22" fill="#ffffff" stroke="#0070e0" stroke-width="3"/>
+  <text x="1246" y="692" font-size="21" font-weight="700" fill="#0b1b3b">PayPal sandbox</text>
+  <text x="1246" y="724" font-size="14" fill="#55627a">Orders v2 for card and PayPal payments.</text>
+  <text x="1246" y="744" font-size="14" fill="#55627a">Payouts batches for sellers.</text>
+  <text x="1246" y="764" font-size="14" fill="#55627a">Webhooks, verified by PayPal itself.</text>
+  <text x="1246" y="802" font-size="14" font-weight="600" fill="#0b1b3b">Sandbox only. No real money moves.</text>
+
+  <!-- Bottom lane: the browser loads PayPal directly -->
+  <path d="M240 850 V920 H1386 V850" fill="none" stroke="#0070e0" stroke-width="2.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <rect x="470" y="906" width="660" height="28" rx="14" fill="#ffffff"/>
+  <text x="800" y="926" font-size="14" text-anchor="middle" fill="#55627a">The checkout talks to PayPal directly for the button and the card fields.</text>
+
+  <text x="48" y="968" font-size="13" fill="#6b7a99">Real: PayPal sandbox, the database, live updates and the AI. Simulated and labeled: local payment methods, exchange rates and the demo data.</text>
+</svg>
