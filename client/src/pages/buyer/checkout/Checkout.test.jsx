@@ -8,6 +8,7 @@ vi.mock('@/api/checkout.js', () => ({
   changeSessionCountry: vi.fn(),
   createPayment: vi.fn(),
   getPayment: vi.fn(),
+  getMethodMatch: vi.fn(),
   settleSimulated: vi.fn(),
 }))
 vi.mock('@/api/paypal.js', () => ({
@@ -41,6 +42,8 @@ beforeEach(() => {
   useCatalog.setState({ status: 'ready', error: null, merchant, products: courses, countries })
   useLearner.setState({ courses: [], loaded: true })
   useSession.setState({ merchant: 'pdl', buyer: null })
+  /* Method Match is not what most of these tests are about: without it the methods keep their usual order. */
+  api.getMethodMatch.mockRejectedValue(new Error('unavailable'))
   api.startSession.mockResolvedValue({ id: 'session-1' })
   api.changeSessionCountry.mockResolvedValue({})
   api.createPayment.mockResolvedValue({ payment: paymentOf() })
@@ -370,5 +373,45 @@ describe('Checkout: the page around it', () => {
     rerender(<Checkout param="sql-in-practice" />)
     expect(screen.getByRole('heading', { name: 'SQL in Practice' })).toBeTruthy()
     expect(screen.getByLabelText('Full name').value).toBe('Aminata Koné')
+  })
+})
+
+describe('Checkout: through a payment link', () => {
+  const link = { code: '9n2pdmb6', title: 'Launch week', note: 'Thanks for joining.' }
+
+  it('shows which link the buyer came through, and its note', () => {
+    render(<Checkout param="ai-for-work" link={link} />)
+    const summary = screen.getByRole('complementary', { name: 'Order summary' })
+    expect(within(summary).getByText('Launch week')).toBeTruthy()
+    expect(within(summary).getByText('Thanks for joining.')).toBeTruthy()
+    expect(within(summary).getByRole('heading', { name: 'AI for Work' })).toBeTruthy()
+  })
+
+  it('shows the link without a note when it has none', () => {
+    render(<Checkout param="ai-for-work" link={{ ...link, note: null }} />)
+    expect(screen.getByText('Launch week')).toBeTruthy()
+    expect(screen.queryByText('Thanks for joining.')).toBeNull()
+  })
+
+  it('tells the server about the link, on the visit and on the payment, so the seller sees where the sale came from', async () => {
+    render(<Checkout param="ai-for-work" link={link} />)
+    await waitFor(() =>
+      expect(api.startSession).toHaveBeenCalledWith({ product: 'ai-for-work', country: 'CI', link: '9n2pdmb6' }),
+    )
+    await act(async () => {})
+    fireEvent.click(payButton())
+    expect(await screen.findByRole('heading', { name: "You're in" })).toBeTruthy()
+    expect(api.createPayment).toHaveBeenCalledWith(
+      expect.objectContaining({ product: 'ai-for-work', link: '9n2pdmb6' }),
+    )
+  })
+
+  it('mentions no link at all when there is none', async () => {
+    show()
+    await waitFor(() => expect(api.startSession).toHaveBeenCalled())
+    expect(api.startSession.mock.calls[0][0].link).toBeUndefined()
+    fireEvent.click(payButton())
+    await screen.findByRole('heading', { name: "You're in" })
+    expect(api.createPayment.mock.calls[0][0].link).toBeUndefined()
   })
 })

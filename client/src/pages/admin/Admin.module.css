@@ -1,0 +1,355 @@
+/* Pieces only the admin pages use. The shared ones (stats, split, stack, filters, detail, timeline, countries) come from
+   the seller stylesheet, since the whole app is one dashboard design. */
+
+.quiet {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.heading {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+/* The risk score on a bar, with a line at each threshold. */
+.meter {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--fill);
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--success);
+}
+
+.meterFill[data-level='medium'] {
+  background: var(--warning);
+}
+
+.meterFill[data-level='high'] {
+  background: var(--danger);
+}
+
+.meterLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--surface);
+}
+
+/* The rules that fired. */
+.signals {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.signal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.signal:last-child {
+  border-bottom: 0;
+}
+
+.signalLabel {
+  font-weight: var(--fw-medium);
+}
+
+.points {
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.explain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--fill);
+}
+
+.source {
+  font-style: normal;
+}
+
+.assessment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.assessmentHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+/* The review queue. */
+.queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.held {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+}
+
+.heldHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.heldTitle {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.heldMeta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-3) var(--s-5);
+}
+
+.heldMeta dt {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.heldMeta dd {
+  margin: 2px 0 0;
+  font-weight: var(--fw-medium);
+  overflow-wrap: anywhere;
+}
+
+/* A second line under a value, such as the email under a name. */
+.heldMeta dd > span {
+  display: block;
+  font-weight: var(--fw-regular);
+}
+
+.decide {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-3);
+}
+
+.noteField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* A corridor: status picker next to the method. */
+.picker {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.statusSelect {
+  min-height: 34px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.statusSelect:disabled {
+  opacity: 0.6;
+}
+
+/* The fairness page. */
+.fair {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-6);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.heroTitle {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+}
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--s-4);
+  align-items: start;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemTitle {
+  font-weight: var(--fw-medium);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.chip {
+  padding: 4px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+}
+
+.chipNever {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--fill);
+  font-weight: var(--fw-medium);
+}
+
+.probeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: var(--s-2);
+}
+
+.probeCell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+}
+
+.rate {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 120px;
+}
+
+.rateBar {
+  flex: 1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--fill);
+}
+
+.rateBar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.rateValue {
+  min-width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The AI budget of the day. */
+.budget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.budgetBar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--fill);
+}
+
+.budgetBar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.grow {
+  flex: 1;
+}
+
+.padded {
+  padding: var(--s-5);
+}
+
+.json {
+  max-height: 320px;
+  overflow: auto;
+  margin: 0;
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--fill);
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: var(--fs-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .picker {
+    flex-wrap: wrap;
+  }
+}

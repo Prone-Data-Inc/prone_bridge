@@ -1,8 +1,12 @@
 import { request } from './client.js'
 
+/* Method Match: the payment methods of a country, best first, with how often each succeeds there. */
+export const getMethodMatch = (country, options) =>
+  request(`/checkout/match?merchant=pdl&country=${encodeURIComponent(country)}`, options)
+
 /* A visit to the checkout. Lets the seller see who started and who finished. */
-export const startSession = ({ product, country, merchant = 'pdl' }) =>
-  request('/checkout/sessions', { method: 'POST', body: { merchant, product, country } })
+export const startSession = ({ product, country, link, merchant = 'pdl' }) =>
+  request('/checkout/sessions', { method: 'POST', body: { merchant, product, country, link } })
 
 export const changeSessionCountry = (id, country) =>
   request(`/checkout/sessions/${id}`, { method: 'PATCH', body: { country } })

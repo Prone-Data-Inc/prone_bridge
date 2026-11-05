@@ -33,9 +33,11 @@ describe('migrations', () => {
   it('creates the expected tables', async () => {
     const rows = await db.query("select tablename from pg_tables where schemaname = 'public' order by 1")
     expect(rows.map((row) => row.tablename)).toEqual([
+      'ai_usage',
       'audit_log',
       'buyers',
       'checkout_sessions',
+      'copilot_actions',
       'countries',
       'country_methods',
       'enrollments',
@@ -43,10 +45,12 @@ describe('migrations', () => {
       'merchants',
       'notifications',
       'payment_events',
+      'payment_links',
       'payment_methods',
       'payments',
       'payouts',
       'products',
+      'risk_assessments',
       'schema_migrations',
       'webhook_events',
     ])

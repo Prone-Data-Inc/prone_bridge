@@ -3,10 +3,12 @@
      npm run db:migrate          apply the ones that are not
      npm run db:seed             write the demo data (only into an empty database)
      npm run db:reset            erase everything in the app tables, then seed again (asks for --yes)
+     npm run db:risk             score every payment the risk rules have not scored yet (the seed does this itself)
      npm run db:check            end to end check of a Supabase project: connection, schema, security, live signals
    Reads DATABASE_URL (and the CA certificate settings) from .env. */
 import { loadDotenv } from '#server/config/dotenv.js'
 import { loadEnv } from '#server/config/env.js'
+import { createRiskService } from '#server/services/risk.service.js'
 import { createDb } from './client.js'
 import { migrate, migrationStatus } from './migrate.js'
 import { applySeed, clearData, hasData } from './seed/apply.js'
@@ -30,6 +32,12 @@ try {
   db = createDb({ database: env.database, isServerless: false })
 } catch (error) {
   fail(error.message)
+}
+
+/* Scores the demo history with the same rules that score a live payment. Nothing is sent to the AI. */
+const scoreHistory = async () => {
+  const scored = await createRiskService({ db, ai: { enabled: false } }).scoreHistory()
+  say(`risk rules scored ${scored} payment${scored === 1 ? '' : 's'}`)
 }
 
 /* A TLS or network problem should read as one clear line, not a stack trace. */
@@ -62,6 +70,9 @@ try {
         .map(([table, n]) => `${table} ${n}`)
         .join(', ')}`,
     )
+    await scoreHistory()
+  } else if (command === 'risk') {
+    await scoreHistory()
   } else if (command === 'reset') {
     if (!flags.includes('--yes'))
       fail('This erases all payments, buyers and merchants in the database. Run it again with --yes to confirm.')
@@ -72,11 +83,12 @@ try {
         .map(([table, n]) => `${table} ${n}`)
         .join(', ')}`,
     )
+    await scoreHistory()
   } else if (command === 'check') {
     const ok = await runChecks({ db, say, env: process.env })
     process.exitCode = ok ? 0 : 1
   } else {
-    fail(`Unknown command "${command}". Use status, migrate, seed, reset or check.`)
+    fail(`Unknown command "${command}". Use status, migrate, seed, reset, risk or check.`)
   }
 } catch (error) {
   fail(explain(error))

@@ -1,5 +1,5 @@
 /* The left side of the checkout: what is being bought, from whom, and the total in the currency the buyer pays in. */
-import { ArrowLeft, LockSimple } from '@phosphor-icons/react'
+import { ArrowLeft, LinkSimple, LockSimple } from '@phosphor-icons/react'
 import { courseFacts, usd } from '@/lib/format.js'
 import { formatMinor } from '#shared/money.js'
 import { hashFor } from '@/stores/nav.js'
@@ -8,7 +8,7 @@ import CourseCover from '../CourseCover.jsx'
 import s from './Checkout.module.css'
 
 /* price: { currency, minorUnits, amount }. viaPaypal: card and PayPal charge in US dollars, whatever the country. */
-export default function OrderSummary({ product, place, price, viaPaypal }) {
+export default function OrderSummary({ product, place, price, viaPaypal, link = null }) {
   const total = price ? formatMinor(price.amount, price) : null
 
   return (
@@ -18,6 +18,16 @@ export default function OrderSummary({ product, place, price, viaPaypal }) {
           <ArrowLeft size={16} aria-hidden />
           Back to Prone Data Learning
         </a>
+
+        {link && (
+          <div className={s.linkBanner}>
+            <LinkSimple size={18} aria-hidden />
+            <div>
+              <p className={s.linkName}>{link.title}</p>
+              {link.note && <p className={s.linkNote}>{link.note}</p>}
+            </div>
+          </div>
+        )}
 
         <div className={s.item}>
           <CourseCover product={product} size="small" />

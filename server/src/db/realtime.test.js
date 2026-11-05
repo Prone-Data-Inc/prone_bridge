@@ -69,6 +69,30 @@ describe('live signals', () => {
     ])
   })
 
+  it('broadcasts when a risk assessment is written or changed, without a score, a level or a note', async () => {
+    const [{ id: paymentId }] = await db.query(
+      'select p.id from public.payments p where not exists (select 1 from public.risk_assessments r where r.payment_id = p.id) limit 1',
+    )
+    const [{ id }] = await db.query(
+      `insert into public.risk_assessments (payment_id, score, level, decision, signals, explanation, explanation_source, engine)
+       values ($1, 40, 'medium', 'review', '[{"id":"x"}]'::jsonb, 'Held for review.', 'rules', 'rules-1') returning id`,
+      [paymentId],
+    )
+    await db.query(
+      "update public.risk_assessments set explanation = 'A new note.', explanation_source = 'ai' where id = $1",
+      [id],
+    )
+    const signals = await sent()
+    expect(signals.map((s) => s.payload)).toEqual([
+      { table: 'risk_assessments', op: 'INSERT', id },
+      { table: 'risk_assessments', op: 'UPDATE', id },
+    ])
+    for (const signal of signals) {
+      expect(Object.keys(signal.payload).every((key) => ALLOWED.includes(key))).toBe(true)
+      expect(JSON.stringify(signal.payload)).not.toMatch(/medium|score|note|Held/)
+    }
+  })
+
   it('broadcasts a notification with who it is for', async () => {
     await db.query(
       "insert into public.notifications (audience, kind, title, body) values ('admin', 'review.needed', 'Review', 'Look')",

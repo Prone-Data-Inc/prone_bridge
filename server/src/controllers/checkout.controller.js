@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { ok } from '#server/lib/response.js'
-import { parseBody, parseParams } from '#server/lib/validate.js'
+import { parseBody, parseParams, parseQuery } from '#server/lib/validate.js'
 
 const slug = z.string().regex(/^[a-z0-9-]{1,60}$/, 'Use a name like ai-for-work.')
 const country = z.string().regex(/^[A-Z]{2}$/, 'Choose a country.')
@@ -12,7 +12,10 @@ const capture = z.object({
   outcome: z.enum(['approve', 'decline']).default('approve'),
 })
 
-const startSession = z.object({ merchant: slug.default('pdl'), product: slug, country })
+/* The short code of the payment link the buyer came from, if any. */
+const link = z.string().regex(/^[a-z0-9]{6,12}$/, 'That is not a payment link.')
+
+const startSession = z.object({ merchant: slug.default('pdl'), product: slug, country, link: link.optional() })
 const changeCountry = z.object({ country })
 
 const createPayment = z.object({
@@ -22,6 +25,7 @@ const createPayment = z.object({
   country,
   method: z.string().regex(/^[a-z_]{2,30}$/, 'Choose a payment method.'),
   sessionId: id.optional(),
+  link: link.optional(),
   buyer: z.object({
     name: z.string().trim().min(2, 'Enter your name.').max(80, 'That name is too long.'),
     email: z
@@ -33,7 +37,15 @@ const createPayment = z.object({
   }),
 })
 
-export const createCheckoutController = ({ checkoutService, paypalService }) => ({
+const matchQuery = z.object({ merchant: slug.default('pdl'), country })
+
+export const createCheckoutController = ({ checkoutService, paypalService, matchService }) => ({
+  /* The methods of a country, best first (Method Match). */
+  match: async (c) => {
+    const query = parseQuery(c, matchQuery)
+    return ok(c, await matchService.forCountry(query.merchant, query.country))
+  },
+
   startSession: async (c) => ok(c, await checkoutService.startSession(await parseBody(c, startSession)), 201),
 
   changeCountry: async (c) => {

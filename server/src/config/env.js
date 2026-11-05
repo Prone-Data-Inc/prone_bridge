@@ -36,6 +36,7 @@ const schema = z.object({
   OPENAI_API_KEY: text,
   OPENAI_MODEL_AGENT: z.string().min(1).default('gpt-6.1-sol'),
   OPENAI_MODEL_FAST: z.string().min(1).default('gpt-6-luna'),
+  AI_DAILY_LIMIT: z.coerce.number().int().min(1000).max(50_000_000).default(600_000),
 })
 
 export class EnvError extends Error {
@@ -83,6 +84,7 @@ export function loadEnv(source = process.env) {
     ai: Object.freeze({
       apiKey: e.OPENAI_API_KEY,
       models: Object.freeze({ agent: e.OPENAI_MODEL_AGENT, fast: e.OPENAI_MODEL_FAST }),
+      dailyTokenBudget: e.AI_DAILY_LIMIT,
     }),
     /* A key being present is not a live connection. Each integration reports its real status once it exists. */
     integrations: Object.freeze({

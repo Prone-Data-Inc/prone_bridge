@@ -1,0 +1,460 @@
+/* Shared by every page of the seller dashboard. */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--s-4);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-5);
+}
+
+.fact dt {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.fact dd {
+  margin: 2px 0 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+}
+
+.fact small {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+}
+
+.up {
+  color: var(--success);
+}
+
+.down {
+  color: var(--danger);
+}
+
+/* What is worth a look. */
+.attention {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.alert[data-level='warning'] {
+  border-left-color: var(--warning);
+}
+
+.alert[data-level='danger'] {
+  border-left-color: var(--danger);
+}
+
+.alert[data-level='info'] {
+  border-left-color: var(--accent);
+}
+
+.alertText {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The balance card. */
+.balance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.balanceValue {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.muted {
+  color: var(--text-3);
+}
+
+.small {
+  font-size: var(--fs-xs);
+}
+
+/* Filter row above a table. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s-3) var(--s-4);
+}
+
+.filters > * {
+  min-width: 0;
+}
+
+.filterSelect {
+  width: 180px;
+}
+
+.note {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.name {
+  font-weight: var(--fw-medium);
+}
+
+.cellText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.cellSub {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.tag {
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xs);
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+/* A payment, opened. */
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4) var(--s-6);
+}
+
+.detailGrid dt {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.detailGrid dd {
+  margin: 2px 0 0;
+  font-weight: var(--fw-medium);
+  overflow-wrap: anywhere;
+}
+
+.detailGrid .cellSub {
+  display: block;
+  font-weight: var(--fw-regular);
+}
+
+.mono {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: var(--fs-sm);
+}
+
+.heading {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--border);
+}
+
+.timeline li {
+  position: relative;
+}
+
+.timeline li::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: calc(-1 * var(--s-4) - 5px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.timeline li[data-bad='true']::before {
+  background: var(--danger);
+}
+
+.stepTitle {
+  font-weight: var(--fw-medium);
+}
+
+/* Countries and methods. */
+.countries {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--s-4);
+}
+
+.country {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+}
+
+.countryHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.countryName {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.countryStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.countryStats dt {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.countryStats dd {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.leftBar {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--fill);
+}
+
+.leftBar span {
+  display: block;
+  height: 100%;
+}
+
+.leftLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.methods {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
+.method {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.method:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.methodInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.methodName {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: var(--fw-medium);
+}
+
+/* Payment links. */
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.link {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+}
+
+.linkTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: var(--fw-semibold);
+}
+
+.linkUrl {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+  margin-top: var(--s-2);
+}
+
+.linkUrl code {
+  overflow: hidden;
+  padding: 2px 8px;
+  border-radius: var(--r-xs);
+  background: var(--fill);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linkStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.linkStats dt {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.linkStats dd {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+}
+
+.linkActions {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.formPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+
+.ready {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s-3);
+}
+
+@media (max-width: 1100px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .link {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .pair,
+  .detailGrid,
+  .formPair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .countries {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+}

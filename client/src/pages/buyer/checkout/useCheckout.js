@@ -2,12 +2,25 @@
    payment itself, from pressing Pay to the answer. phase moves through
      form -> creating -> waiting -> paid | failed          local (simulated) methods
      form -> confirming -> paid | failed | pending          card and PayPal, through the PayPal sandbox
-   Nothing here decides a price: the server works out the amounts, this only shows them.
+   and, when the safety check holds or stops a payment before any money moves, from either start:
+     form -> review -> cleared -> form (pay again, same request)   a person approved it
+     form -> review -> blocked                                      a person rejected it
+     form -> blocked                                                the check stopped it at once
+   Nothing here decides a price: the server works out the amounts, this only shows them. The methods come in Method
+   Match's order, the one most likely to succeed first, and that one is chosen until the buyer picks another.
    The PayPal rail never leaves the form while the buyer is paying: PayPal's window and its card fields are drawn into
    this page and must stay there until the buyer has approved. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { changeSessionCountry, createPayment, settleSimulated, startSession } from '@/api/checkout.js'
+import {
+  changeSessionCountry,
+  createPayment,
+  getMethodMatch,
+  getPayment,
+  settleSimulated,
+  startSession,
+} from '@/api/checkout.js'
 import { cancelPayment, capturePayment } from '@/api/paypal.js'
+import { onSignal } from '@/realtime/bus.js'
 import { toLocalMinor } from '#shared/money.js'
 import { useCatalog } from '@/stores/catalog.js'
 import { useLearner } from '@/stores/learner.js'
@@ -46,10 +59,18 @@ const problemFrom = (error) => ({
   fields: error.details,
 })
 
-/* Where a finished payment goes next. Anything PayPal still holds is pending. */
-const phaseFor = (status) => (status === 'succeeded' ? 'paid' : status === 'failed' ? 'failed' : 'pending')
+/* Where a payment goes next. Anything PayPal still holds is pending. */
+const PHASES = { succeeded: 'paid', failed: 'failed', blocked: 'blocked', in_review: 'review' }
+const phaseFor = (status) => PHASES[status] ?? 'pending'
 
-export function useCheckout(product) {
+/* A payment that is over for good: the next attempt is a new request. */
+const OVER = new Set(['succeeded', 'failed', 'blocked'])
+
+/* While a payment waits for a person, how often to ask again if no live signal comes. */
+const REVIEW_POLL_MS = 5000
+
+/* link: the payment link the buyer came through, if any ({ code, title, note }). The seller sees the sale came from it. */
+export function useCheckout(product, link = null) {
   const countries = useCatalog((state) => state.countries)
   const buyer = useSession((state) => state.buyer)
   const paypalOn = usePaypal((state) => state.available)
@@ -65,6 +86,8 @@ export function useCheckout(product) {
   const [payment, setPayment] = useState(null)
   const [problem, setProblem] = useState(null)
   const [sessionId, setSessionId] = useState(null)
+  /* Method Match's answer for one country: { country, methods: [{ id, rank, reason, ... }] }, best first. */
+  const [match, setMatch] = useState(null)
   const key = useRef(crypto.randomUUID())
   const started = useRef(false)
   /* The PayPal payment in progress: { paymentId, orderId }. */
@@ -75,11 +98,36 @@ export function useCheckout(product) {
     () => countries.find((entry) => entry.code === country) ?? countries[0] ?? null,
     [countries, country],
   )
-  const methods = place?.methods ?? []
+  const placeCode = place?.code
+
+  /* Method Match for this country. If it cannot be had, the methods stay in the usual order. */
+  useEffect(() => {
+    if (!placeCode) return
+    let current = true
+    getMethodMatch(placeCode).then(
+      (answer) => current && setMatch({ country: placeCode, methods: answer.methods }),
+      () => current && setMatch(null),
+    )
+    return () => {
+      current = false
+    }
+  }, [placeCode])
+
+  /* The country's methods in Method Match's order, each carrying its entry. A method it does not know goes last. */
+  const methods = useMemo(() => {
+    const base = place?.methods ?? []
+    if (!match || match.country !== placeCode) return base
+    const entries = new Map(match.methods.map((entry) => [entry.id, entry]))
+    return base
+      .map((entry, index) => ({ entry, index, match: entries.get(entry.id) }))
+      .sort((a, b) => (a.match?.rank ?? Infinity) - (b.match?.rank ?? Infinity) || a.index - b.index)
+      .map(({ entry, match: found }) => (found ? { ...entry, match: found } : entry))
+  }, [place, match, placeCode])
 
   /* A method can be chosen when it is a simulation, or when it goes through PayPal and PayPal is connected. */
   const ready = useCallback((entry) => entry.simulated || (entry.provider === 'paypal' && paypalOn), [paypalOn])
   const method = methods.find((entry) => entry.id === methodId && ready(entry)) ?? methods.find(ready) ?? null
+  const bestId = methods.find((entry) => entry.match && ready(entry))?.id ?? null
   const viaPaypal = Boolean(method && !method.simulated)
 
   /* What the buyer pays, in the currency they pay it in. Local methods use the local price. Card and PayPal charge in
@@ -108,16 +156,18 @@ export function useCheckout(product) {
   useEffect(() => {
     if (started.current || !product || !place) return
     started.current = true
-    startSession({ product: product.slug, country: place.code }).then(
+    startSession({ product: product.slug, country: place.code, link: link?.code }).then(
       (session) => setSessionId(session.id),
       () => {},
     )
-  }, [product, place])
+  }, [product, place, link])
 
   const chooseCountry = useCallback(
     (code) => {
       setCountryCode(code)
       remember(code)
+      /* A new country starts from its best match again, not from the method picked in the last one. */
+      setMethodId(null)
       setPhone('')
       setProblem(null)
       if (!touched) setContact(personaFor(code))
@@ -154,9 +204,10 @@ export function useCheckout(product) {
       country: place.code,
       method: method.id,
       sessionId: sessionId ?? undefined,
+      link: link?.code,
       buyer: { name: contact.name.trim(), email: contact.email.trim() },
     }),
-    [product, place, method, sessionId, contact],
+    [product, place, method, sessionId, contact, link],
   )
 
   /* The buyer is now known: their messages and their courses come with them. */
@@ -165,12 +216,50 @@ export function useCheckout(product) {
     [contact],
   )
 
-  /* A payment is over: show how it ended, and bring in the notification and the unlocked course. */
+  /* A payment is over, or held for a person: show how it stands, and bring in the notification and the unlocked course.
+     A payment held for review keeps its request, so approving it lets the same payment go on. */
   const finalize = useCallback(async (settled) => {
     setPayment(settled)
-    if (settled.status === 'succeeded' || settled.status === 'failed') key.current = crypto.randomUUID()
+    if (OVER.has(settled.status)) key.current = crypto.randomUUID()
     setPhase(phaseFor(settled.status))
     await Promise.all([useNotifications.getState().refresh('buyer'), useLearner.getState().load()])
+  }, [])
+
+  /* Held for review: wait for a person. A live signal says the payment changed, and a slow check covers a missed one. */
+  useEffect(() => {
+    if (phase !== 'review' || !payment) return
+    let current = true
+    const check = async () => {
+      try {
+        const { payment: latest } = await getPayment(payment.id)
+        if (!current || latest.status === 'in_review') return
+        if (latest.status === 'requires_payment' || latest.status === 'processing') {
+          setPayment(latest)
+          setPhase('cleared')
+          useNotifications.getState().refresh('buyer')
+        } else {
+          await finalize(latest)
+        }
+      } catch {
+        /* The next signal or the next check tries again. */
+      }
+    }
+    const stop = onSignal((signal) => {
+      if (signal.table === 'payments' && signal.id === payment.id) check()
+    })
+    const timer = setInterval(check, REVIEW_POLL_MS)
+    return () => {
+      current = false
+      stop()
+      clearInterval(timer)
+    }
+  }, [phase, payment, finalize])
+
+  /* The check is done: back to the form, with the same request, so pressing Pay goes on with the same payment. */
+  const continueAfterReview = useCallback(() => {
+    setPayment(null)
+    setProblem(null)
+    setPhase('form')
   }, [])
 
   /* Local methods: create the payment, wait for the simulated provider, then settle it the way the demo control says. */
@@ -182,6 +271,11 @@ export function useCheckout(product) {
       const { payment: created } = await createPayment(requestBody())
       setPayment(created)
       rememberBuyer(created.buyer.id)
+      /* The safety check held it, or stopped it, before any money moved. */
+      if (created.status === 'in_review' || created.status === 'blocked') {
+        await finalize(created)
+        return
+      }
       setPhase('waiting')
 
       await sleep(timing.waitMs)
@@ -281,6 +375,8 @@ export function useCheckout(product) {
     viaPaypal,
     chooseCountry,
     chooseMethod,
+    bestId,
+    continueAfterReview,
     price,
     contact,
     editContact,

@@ -44,6 +44,30 @@
   color: var(--text);
 }
 
+/* The payment link a buyer came through. */
+.linkBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.linkBanner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.linkName {
+  font-weight: var(--fw-semibold);
+}
+
+.linkNote {
+  color: var(--text-2);
+}
+
 .item {
   display: flex;
   align-items: center;
@@ -260,6 +284,30 @@
   font-weight: var(--fw-medium);
   line-height: 16px;
   white-space: nowrap;
+}
+
+/* Method Match: the method most likely to succeed, and why. */
+.best {
+  padding: 1px 8px;
+  border-radius: var(--r-xs);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.matchNote {
+  margin-top: 2px;
+  color: var(--accent);
+  font-size: var(--fs-xs);
+}
+
+.matchBasis {
+  margin-top: var(--s-1);
+  color: var(--text-3);
+  font-size: var(--fs-xs);
 }
 
 .radio {

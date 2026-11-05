@@ -13,6 +13,9 @@ vi.mock('@/api/catalog.js', () => ({
   listCountries: vi.fn(async () => ({ merchant: { slug: 'pdl', name: 'Prone Data Learning' }, countries: [] })),
 }))
 vi.mock('@/api/learners.js', () => ({ listCourses: vi.fn(async () => ({ courses: [] })) }))
+vi.mock('@/api/seller.js', () => new Proxy({}, { get: () => vi.fn(() => new Promise(() => {})) }))
+vi.mock('@/api/admin.js', () => new Proxy({}, { get: () => vi.fn(() => new Promise(() => {})) }))
+vi.mock('@/api/copilot.js', () => new Proxy({}, { get: () => vi.fn(() => new Promise(() => {})) }))
 
 const { useNav, hashFor } = await import('@/stores/nav.js')
 const { useSession } = await import('@/stores/session.js')
@@ -37,20 +40,21 @@ beforeEach(() => {
 
 describe('AppShell', () => {
   it('draws the tab strip, the toolbar and the page of the open tab', () => {
-    open('seller', 'payments')
+    /* Settings is the one seller page still to come, so it shows the placeholder. */
+    open('seller', 'settings')
     render(<AppShell />)
 
     expect(screen.getAllByRole('tab')).toHaveLength(3)
     const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' })
-    expect(crumbs.textContent).toBe('SellerPayments')
-    expect(screen.getByRole('heading', { level: 1, name: 'Payments' })).toBeTruthy()
-    expect(screen.getByText('This page is built in step 6.')).toBeTruthy()
+    expect(crumbs.textContent).toBe('SellerSettings')
+    expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeTruthy()
+    expect(screen.getByText('This page is built in step 9.')).toBeTruthy()
     expect(screen.getByRole('tabpanel').id).toBe('workspace-seller')
     expect(screen.getByRole('tab', { name: 'Seller' }).getAttribute('aria-controls')).toBe('workspace-seller')
   })
 
   it('keeps a tab you have visited alive, hidden, while you are on another', () => {
-    open('seller', 'payments')
+    open('seller', 'settings')
     render(<AppShell />)
     expect(screen.queryByRole('tabpanel', { hidden: true, name: 'Buyer' })).toBeNull()
 
@@ -62,10 +66,10 @@ describe('AppShell', () => {
       ['workspace-admin', false],
     ])
     /* the seller's page is still there, just not shown */
-    expect(within(panels[0]).getByRole('heading', { level: 1, name: 'Payments', hidden: true })).toBeTruthy()
+    expect(within(panels[0]).getByRole('heading', { level: 1, name: 'Settings', hidden: true })).toBeTruthy()
     expect(screen.getByRole('tabpanel').id).toBe('workspace-admin')
 
-    act(() => useNav.getState().sync(hashFor('seller', 'payments')))
+    act(() => useNav.getState().sync(hashFor('seller', 'settings')))
     expect(screen.getByRole('tabpanel').id).toBe('workspace-seller')
   })
 
@@ -74,12 +78,21 @@ describe('AppShell', () => {
     render(<AppShell />)
 
     const nav = screen.getByRole('complementary', { name: 'Seller navigation' })
-    for (const label of ['Home', 'Payments', 'Customers', 'Payouts', 'Countries', 'Copilot', 'Settings']) {
+    for (const label of [
+      'Overview',
+      'Payments',
+      'Customers',
+      'Payouts',
+      'Payment links',
+      'Countries',
+      'Copilot',
+      'Settings',
+    ]) {
       expect(within(nav).getByRole('button', { name: label })).toBeTruthy()
     }
     expect(within(nav).getByText('Business')).toBeTruthy()
     expect(within(nav).getByRole('button', { name: 'Payments' }).getAttribute('aria-current')).toBe('page')
-    expect(within(nav).getByRole('button', { name: 'Home' }).getAttribute('aria-current')).toBeNull()
+    expect(within(nav).getByRole('button', { name: 'Overview' }).getAttribute('aria-current')).toBeNull()
   })
 
   it('gives the admin its own sidebar', () => {

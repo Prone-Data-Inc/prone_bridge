@@ -16,7 +16,7 @@ import MethodDetails from './MethodDetails.jsx'
 import MethodList from './MethodList.jsx'
 import OrderSummary from './OrderSummary.jsx'
 import PaypalPay from './PaypalPay.jsx'
-import { Failed, Paid, Pending } from './Result.jsx'
+import { Blocked, Cleared, Failed, Paid, Pending, Review } from './Result.jsx'
 import { useCheckout } from './useCheckout.js'
 import Waiting from './Waiting.jsx'
 import s from './Checkout.module.css'
@@ -50,12 +50,12 @@ function Problem({ problem, onOpen, onNewBuyer, onRetry }) {
   )
 }
 
-function Flow({ product }) {
+function Flow({ product, link }) {
   const go = useNav((state) => state.go)
   const buyer = useSession((state) => state.buyer)
   const unlocked = useLearner((state) => state.courses.some((course) => course.id === product.id))
   const countries = useCatalog((state) => state.countries)
-  const checkout = useCheckout(product)
+  const checkout = useCheckout(product, link)
   const { place, method, price, viaPaypal, contact, phase, problem } = checkout
 
   /* Owning the course only matters for the person who owns it. With a new demo buyer in the form, it can be bought again. */
@@ -90,6 +90,12 @@ function Flow({ product }) {
     main = <Paid payment={checkout.payment} place={place} />
   } else if (phase === 'pending') {
     main = <Pending payment={checkout.payment} />
+  } else if (phase === 'review') {
+    main = <Review payment={checkout.payment} />
+  } else if (phase === 'cleared') {
+    main = <Cleared payment={checkout.payment} onContinue={checkout.continueAfterReview} />
+  } else if (phase === 'blocked') {
+    main = <Blocked payment={checkout.payment} />
   } else if (phase === 'failed') {
     main = <Failed payment={checkout.payment} onRetry={checkout.tryAgain} />
   } else if (owned && !problem) {
@@ -163,6 +169,7 @@ function Flow({ product }) {
             selectedId={method?.id}
             onChoose={checkout.chooseMethod}
             ready={checkout.ready}
+            bestId={checkout.bestId}
           />
           <MethodDetails
             method={method}
@@ -205,7 +212,7 @@ function Flow({ product }) {
 
   return (
     <div className={s.page}>
-      <OrderSummary product={product} place={place} price={price} viaPaypal={viaPaypal} />
+      <OrderSummary product={product} place={place} price={price} viaPaypal={viaPaypal} link={link} />
       <main className={s.main}>
         <div className={s.mainInner}>{main}</div>
       </main>
@@ -213,7 +220,8 @@ function Flow({ product }) {
   )
 }
 
-export default function Checkout({ param: slug }) {
+/* link: a payment link this checkout came through, with its title and note. */
+export default function Checkout({ param: slug, link = null }) {
   const { status, products, error, ensure, reload } = useCatalog()
   const go = useNav((state) => state.go)
 
@@ -269,5 +277,5 @@ export default function Checkout({ param: slug }) {
   }
 
   /* A new course starts a new checkout. */
-  return <Flow key={product.id} product={product} />
+  return <Flow key={product.id} product={product} link={link} />
 }

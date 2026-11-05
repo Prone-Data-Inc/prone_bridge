@@ -50,8 +50,10 @@ export function createPaymentRepository({ db }) {
       const [row] = await db.query(
         `insert into public.payments
            (reference, merchant_id, product_id, buyer_id, method_id, country_code, amount_usd_cents, display_currency,
-            display_amount_minor, fx_rate, fee_usd_cents, status, provider, idempotency_key, origin)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'app')
+            display_amount_minor, fx_rate, fee_usd_cents, status, provider, idempotency_key, link_id, failure_code,
+            completed_at, origin)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+                 case when $17::boolean then now() end, 'app')
          on conflict (idempotency_key) do nothing
          returning id`,
         [
@@ -69,9 +71,30 @@ export function createPaymentRepository({ db }) {
           payment.status,
           payment.provider,
           payment.idempotencyKey,
+          payment.linkId ?? null,
+          payment.failureCode ?? null,
+          Boolean(payment.finished),
         ],
       )
       return row?.id ?? null
+    },
+
+    /* A person cleared a payment held for review: it goes back to where a payment starts, so the buyer can finish paying. */
+    async clearReview(id, status) {
+      const rows = await db.query(
+        "update public.payments set status = $2 where id = $1 and status = 'in_review' returning id",
+        [id, status],
+      )
+      return rows.length > 0
+    },
+
+    /* A person rejected a payment held for review. */
+    async rejectReview(id, code) {
+      const rows = await db.query(
+        "update public.payments set status = 'blocked', failure_code = $2, completed_at = now() where id = $1 and status = 'in_review' returning id",
+        [id, code],
+      )
+      return rows.length > 0
     },
 
     /* The PayPal order made for this payment. Set once: a second order for the same payment is never recorded. */
@@ -153,10 +176,10 @@ export function createPaymentRepository({ db }) {
     },
 
     /* Checkout sessions: the visit that leads to a payment. */
-    async createSession({ merchantId, productId, countryCode }) {
+    async createSession({ merchantId, productId, countryCode, linkId = null }) {
       const [row] = await db.query(
-        `insert into public.checkout_sessions (merchant_id, product_id, country_code) values ($1, $2, $3) returning id`,
-        [merchantId, productId, countryCode],
+        `insert into public.checkout_sessions (merchant_id, product_id, country_code, link_id) values ($1, $2, $3, $4) returning id`,
+        [merchantId, productId, countryCode, linkId],
       )
       return row.id
     },

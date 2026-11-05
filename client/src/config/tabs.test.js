@@ -44,13 +44,66 @@ describe('tabs', () => {
     expect(groupsOf(tabById('admin')).map((group) => group.label)).toEqual(['Operations', 'Network', 'Trust'])
   })
 
+  it('gives the seller the pages of the dashboard, with payment links among the business pages', () => {
+    const seller = tabById('seller')
+    expect(seller.sections.map((section) => section.id)).toEqual([
+      'home',
+      'payments',
+      'customers',
+      'payouts',
+      'links',
+      'countries',
+      'copilot',
+      'settings',
+    ])
+    expect(seller.sections.find((section) => section.id === 'home').label).toBe('Overview')
+    expect(groupsOf(seller)[0].sections.map((section) => section.label)).toEqual([
+      'Overview',
+      'Payments',
+      'Customers',
+      'Payouts',
+      'Payment links',
+    ])
+    /* the pages the seller dashboard builds have no step left to wait for */
+    const built = seller.sections.filter((section) => section.step === 6).map((section) => section.id)
+    expect(built).toEqual(['home', 'payments', 'customers', 'payouts', 'links', 'countries'])
+  })
+
+  it('gives the admin its eight pages, in the order of the sidebar', () => {
+    const admin = tabById('admin')
+    expect(admin.sections.map((section) => section.id)).toEqual([
+      'overview',
+      'transactions',
+      'review',
+      'merchants',
+      'corridors',
+      'settlements',
+      'fairness',
+      'audit',
+    ])
+    expect(groupsOf(admin).map((group) => group.sections.map((section) => section.label))).toEqual([
+      ['Overview', 'Transactions', 'Risk review'],
+      ['Merchants', 'Corridors', 'Settlements'],
+      ['Fairness', 'Audit log'],
+    ])
+  })
+
+  it('has a page for every section it lists, apart from Settings, which comes in step 9', async () => {
+    const { PAGES } = await import('@/pages/index.js')
+    const missing = TABS.flatMap((tab) => tab.sections.map((section) => `${tab.id}/${section.id}`)).filter(
+      (key) => !(key in PAGES),
+    )
+    expect(missing).toEqual(['seller/settings'])
+  })
+
   it('gives the storefront its pages, with the ones reached by a link kept out of any menu', () => {
     const buyer = tabById('buyer')
-    expect(buyer.sections.map((section) => section.id)).toEqual(['home', 'course', 'checkout', 'learn'])
+    expect(buyer.sections.map((section) => section.id)).toEqual(['home', 'course', 'checkout', 'learn', 'link'])
     expect(buyer.sections.filter((section) => section.hidden).map((section) => section.id)).toEqual([
       'course',
       'checkout',
       'learn',
+      'link',
     ])
     for (const tab of TABS) {
       const shown = groupsOf(tab).flatMap((group) => group.sections)

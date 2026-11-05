@@ -1,0 +1,225 @@
+/* The copilot page: a conversation, the changes it proposes, and the box to ask in. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.suggestion {
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background 0.15s var(--ease);
+}
+
+.suggestion:hover:not(:disabled) {
+  background: var(--fill-hover);
+}
+
+.suggestion:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  max-width: 92%;
+}
+
+.turn[data-role='user'] {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.turn[data-role='assistant'] {
+  align-self: flex-start;
+}
+
+.bubble {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-lg);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bubble[data-role='user'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-bottom-right-radius: var(--r-xs);
+  white-space: pre-wrap;
+}
+
+.bubble[data-role='assistant'] {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-bottom-left-radius: var(--r-xs);
+}
+
+.bubble[data-error='true'] {
+  border-color: var(--danger);
+}
+
+.bubble p + p,
+.bubble p + ul,
+.bubble ul + p {
+  margin-top: var(--s-3);
+}
+
+.bubble ul {
+  padding-left: var(--s-5);
+  list-style: disc;
+}
+
+.bubble li + li {
+  margin-top: var(--s-1);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-2);
+}
+
+.step {
+  padding: 1px 8px;
+  border-radius: var(--r-full);
+  background: var(--fill);
+}
+
+/* A change the copilot prepared. It does nothing until the seller presses Confirm. */
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.action[data-status='confirmed'] {
+  border-color: var(--success);
+}
+
+.action[data-status='dismissed'],
+.action[data-status='expired'] {
+  border-color: var(--border-strong);
+  opacity: 0.8;
+}
+
+.action[data-status='failed'] {
+  border-color: var(--danger);
+}
+
+.actionTitle {
+  font-weight: var(--fw-semibold);
+}
+
+.actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--text-3);
+}
+
+/* The box to ask in. */
+.composer {
+  position: sticky;
+  bottom: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.composerRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-3);
+}
+
+.input {
+  flex: 1;
+  min-height: 44px;
+  max-height: 160px;
+  padding: var(--s-2) var(--s-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1.5;
+  resize: none;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.composerNote {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-2);
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+
+.waiting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+@media (max-width: 720px) {
+  .turn {
+    max-width: 100%;
+  }
+}

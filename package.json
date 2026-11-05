@@ -32,6 +32,7 @@
     "db:migrate": "node server/src/db/cli.js migrate",
     "db:seed": "node server/src/db/cli.js seed",
     "db:reset": "node server/src/db/cli.js reset",
+    "db:risk": "node server/src/db/cli.js risk",
     "db:check": "node server/src/db/cli.js check"
   },
   "dependencies": {

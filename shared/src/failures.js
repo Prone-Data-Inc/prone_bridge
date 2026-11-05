@@ -11,6 +11,8 @@ export const FAILURES = {
   session_expired: 'The session expired.',
   voucher_expired: 'The voucher expired.',
   payer_cancelled: 'The payment was cancelled.',
+  /* Risk checks. Said the same way to everyone, so a block never explains how to get past it. */
+  safety_check: 'A safety check stopped this payment.',
 }
 
 export const failureMessage = (code) => FAILURES[code] ?? 'The payment did not go through.'

@@ -8,6 +8,7 @@ import {
   GearSix,
   GlobeHemisphereWest,
   House,
+  LinkSimple,
   ListMagnifyingGlass,
   Path,
   Scales,
@@ -41,6 +42,14 @@ export const TABS = [
       },
       { id: 'checkout', label: 'Checkout', icon: CreditCard, subtitle: 'Pay with ProneBridge.', step: 4, hidden: true },
       { id: 'learn', label: 'My courses', icon: House, subtitle: 'What you have unlocked.', step: 4, hidden: true },
+      {
+        id: 'link',
+        label: 'Payment link',
+        icon: LinkSimple,
+        subtitle: 'Pay through a seller link.',
+        step: 6,
+        hidden: true,
+      },
     ],
   },
   {
@@ -51,7 +60,7 @@ export const TABS = [
     sidebar: true,
     identity: { name: 'Prone Data Learning', role: 'Seller' },
     sections: [
-      { id: 'home', label: 'Home', icon: House, group: 'Business', subtitle: 'Your sales at a glance.', step: 6 },
+      { id: 'home', label: 'Overview', icon: House, group: 'Business', subtitle: 'Your sales at a glance.', step: 6 },
       {
         id: 'payments',
         label: 'Payments',
@@ -69,6 +78,14 @@ export const TABS = [
         step: 6,
       },
       { id: 'payouts', label: 'Payouts', icon: Bank, group: 'Business', subtitle: 'Money on its way to you.', step: 6 },
+      {
+        id: 'links',
+        label: 'Payment links',
+        icon: LinkSimple,
+        group: 'Business',
+        subtitle: 'Share a course with one link, get paid anywhere.',
+        step: 6,
+      },
       {
         id: 'countries',
         label: 'Countries',
@@ -91,7 +108,7 @@ export const TABS = [
         icon: GearSix,
         group: 'Account',
         subtitle: 'Your account and payout details.',
-        step: 6,
+        step: 9,
       },
     ],
   },

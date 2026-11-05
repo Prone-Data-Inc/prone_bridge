@@ -9,6 +9,12 @@ export function reference(prefix = 'pb', length = 12) {
   return `${prefix}_${Array.from({ length }, () => ALPHABET[randomInt(ALPHABET.length)]).join('')}`
 }
 
+const LINK_ALPHABET = 'abcdefghjkmnpqrstvwxyz23456789'
+
+/* k7m3q9x2: the short code in a payment link. Lowercase, with no look-alike letters, so it survives being read aloud. */
+export const linkCode = (length = 8) =>
+  Array.from({ length }, () => LINK_ALPHABET[randomInt(LINK_ALPHABET.length)]).join('')
+
 /* "Aminata Diallo" -> "Aminata D." for messages that mention a buyer. */
 export function shortName(name = '') {
   const words = name.trim().split(/\s+/).filter(Boolean)

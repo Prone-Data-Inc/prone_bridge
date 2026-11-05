@@ -12,6 +12,7 @@ vi.mock('@/api/checkout.js', () => ({
   changeSessionCountry: vi.fn(),
   createPayment: vi.fn(),
   getPayment: vi.fn(),
+  getMethodMatch: vi.fn(),
   settleSimulated: vi.fn(),
 }))
 vi.mock('@/api/paypal.js', () => ({
@@ -57,6 +58,8 @@ beforeEach(() => {
   paypalApi.getClientToken.mockResolvedValue({ clientToken: 'browser-token', expiresIn: 900 })
   paypalApi.capturePayment.mockResolvedValue({ payment: paypalSucceeded() })
   paypalApi.cancelPayment.mockResolvedValue({ payment: paypalFailed({ failureCode: 'payer_cancelled' }) })
+  /* Method Match is not what these tests are about: without it the methods keep their usual order. */
+  checkoutApi.getMethodMatch.mockRejectedValue(new Error('unavailable'))
   checkoutApi.startSession.mockResolvedValue({ id: 'session-1' })
   checkoutApi.changeSessionCountry.mockResolvedValue({})
   checkoutApi.createPayment.mockResolvedValue({ payment: paypalPaymentOf(), paypal: { orderId: 'ORDER1' } })
