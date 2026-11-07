@@ -112,7 +112,10 @@ export function createCheckoutService({ db, catalogRepository, paypal, risk, now
       const { id, fresh } = await db.tx(async (t) => {
         const tx = { checkout: createCheckoutRepository({ db: t }), payments: createPaymentRepository({ db: t }) }
         const person = await tx.checkout.upsertBuyer({ email: buyer.email, name: buyer.name, countryCode: country })
-        if (await tx.checkout.owns(person.id, product.id)) throw conflict('You already own this course.')
+        /* The reason is a stable word the web app switches on: it carries on as a new demo buyer instead of showing this. */
+        if (await tx.checkout.owns(person.id, product.id)) {
+          throw conflict('You already own this course.', { reason: 'already_owned' })
+        }
 
         /* Every payment is scored before any money moves, from what the buyer did. The country is not an input: the
            call below does not even pass it. Low goes ahead, medium waits for a person, high is blocked. */

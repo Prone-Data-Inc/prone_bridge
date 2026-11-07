@@ -383,6 +383,7 @@ describe('buyer checkout', () => {
       const again = await pay({ buyer: person })
       expect(again.status).toBe(409)
       expect(again.body.error.message).toBe('You already own this course.')
+      expect(again.body.error.details).toEqual({ reason: 'already_owned' })
       expect((await pay({ buyer: person, product: 'prompt-craft' })).status).toBe(201)
     })
   })

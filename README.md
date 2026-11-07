@@ -310,7 +310,9 @@ Every table has row level security and no policy, so Supabase's public data API 
 
 ## Submission kit
 
-In `docs/`: the architecture diagram (`architecture.svg` and `architecture.png`), the Devpost text (`DEVPOST.md`) and the shot list for the demo video (`SHOT_LIST.md`).
+In `docs/`: the architecture diagram (`architecture.svg` and `architecture.png`), the Devpost text (`DEVPOST.md`) and a shot list for a hand edited video (`SHOT_LIST.md`).
+
+In `video/`: the demo film itself, made by code (voice, footage, map, code shots and captions), so it can be made again after any change. `video/README.md` says how, and `video/final_script.md` holds the narration.
 
 ## License
 

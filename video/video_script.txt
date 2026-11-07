@@ -1,0 +1,12 @@
+Video Script:
+Paypal, VISA and Mastercard are the most used payment methods world wide. The majority of nations in Europe, America and Asia seamlessly accepts these payments, however it's not the same story for Africa. We created Prone Data Learning to offer the latest knowledge on AI and Automation across the African Continent. However, we are currently held back by a big problem, there is no payment intergrator that let's businesses sell across all African nations.
+
+That's why we built Prone Bridge, Prone Bridge is a payment integrator that accepts world wide payments like paypal, visa and also local payment across the African countries such as Orange Money, Moov, MTN Mobile Money. Prone Bridge helps any vendors, e-commerce, learning platform, SaaS and more accepts all local payments from the different African nations. 
+
+This was possible with the help of Paypal, used for receiving payments and payouts, connects local payments and convert them to USD for international transactions, helping the diaspora, foreign investors to easily receive or send money.
+
+To improve the user experience and the security of transactions, we integrated an AI to help sellers on their KPIs, and management like create a payment link. For security, we setup a risk analyst system based on predefined rules and categorized in terms of risk importance, the ai only handle the deterministic transaction and let the high risk to be review by a human.
+
+Prone Bridge solves the biggest bottleneck of the African market and this was possible with the help of Paypal tools and OpenAI AI models.
+
+Thank you

@@ -30,6 +30,7 @@ const { ApiError } = await import('@/api/client.js')
 const { useCatalog } = await import('@/stores/catalog.js')
 const { useLearner } = await import('@/stores/learner.js')
 const { useSession } = await import('@/stores/session.js')
+const { useToasts } = await import('@/stores/toasts.js')
 const { timing } = await import('./simulation.js')
 const { default: Checkout } = await import('./Checkout.jsx')
 
@@ -37,11 +38,14 @@ const merchant = { slug: 'pdl', name: 'Prone Data Learning' }
 
 beforeEach(() => {
   window.localStorage.clear()
+  /* Each browser is its own demo buyer. This one is Aminata, number 4821. */
+  window.localStorage.setItem('pb.persona', '4821')
   window.location.hash = ''
   timing.waitMs = 0
   useCatalog.setState({ status: 'ready', error: null, merchant, products: courses, countries })
   useLearner.setState({ courses: [], loaded: true })
   useSession.setState({ merchant: 'pdl', buyer: null })
+  useToasts.setState({ items: [] })
   /* Method Match is not what most of these tests are about: without it the methods keep their usual order. */
   api.getMethodMatch.mockRejectedValue(new Error('unavailable'))
   api.startSession.mockResolvedValue({ id: 'session-1' })
@@ -63,7 +67,7 @@ describe('Checkout: the form', () => {
     expect(within(summary).getByText('XOF 23,400')).toBeTruthy()
     expect(within(summary).getByText('$39 USD. Indicative rate, simulated.')).toBeTruthy()
     expect(screen.getByLabelText('Full name').value).toBe('Aminata Koné')
-    expect(screen.getByLabelText('Email').value).toBe('aminata.kone@example.com')
+    expect(screen.getByLabelText('Email').value).toBe('aminata.kone4821@example.com')
     expect(payButton().textContent).toBe('Pay XOF 23,400')
   })
 
@@ -168,7 +172,7 @@ describe('Checkout: paying', () => {
       country: 'CI',
       method: 'mobile_money',
       sessionId: 'session-1',
-      buyer: { name: 'Aminata Koné', email: 'aminata.kone@example.com' },
+      buyer: { name: 'Aminata Koné', email: 'aminata.kone4821@example.com' },
     })
     expect(api.settleSimulated).toHaveBeenCalledWith('pay-1', 'approve')
 
@@ -183,7 +187,7 @@ describe('Checkout: paying', () => {
     expect(useSession.getState().buyer).toEqual({
       id: 'buyer-1',
       name: 'Aminata Koné',
-      email: 'aminata.kone@example.com',
+      email: 'aminata.kone4821@example.com',
     })
     await waitFor(() => expect(listCourses).toHaveBeenCalledWith('buyer-1'))
   })
@@ -277,6 +281,28 @@ describe('Checkout: paying', () => {
     fireEvent.click(payButton())
     fireEvent.click(await screen.findByRole('button', { name: 'Open the course' }))
     expect(window.location.hash).toBe('#/buyer/course/ai-for-work')
+  })
+
+  it('carries on as a new demo buyer when the email already owns the course, with no refusal on screen', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    api.createPayment.mockRejectedValueOnce(
+      new ApiError(409, 'conflict', 'You already own this course.', 'r-1', { reason: 'already_owned' }),
+    )
+    show()
+    fireEvent.click(payButton())
+
+    expect(await screen.findByRole('heading', { name: "You're in" })).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(api.createPayment).toHaveBeenCalledTimes(2)
+    const [first, second] = api.createPayment.mock.calls.map(([body]) => body)
+    expect(first.buyer.email).toBe('aminata.kone4821@example.com')
+    expect(second.buyer).toEqual({ name: 'Aminata Koné', email: 'aminata.kone5500@example.com' })
+    expect(second.idempotencyKey).not.toBe(first.idempotencyKey)
+    /* the new buyer is the one remembered, and the buyer is told in a calm toast */
+    expect(useSession.getState().buyer.email).toBe('aminata.kone5500@example.com')
+    expect(window.localStorage.getItem('pb.persona')).toBe('5500')
+    const told = useToasts.getState().items.map((item) => item.message)
+    expect(told).toEqual(['That email already has this course, so you are paying as a new demo buyer.'])
   })
 
   it('shows which field the server did not accept', async () => {

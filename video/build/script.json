@@ -1,0 +1,60 @@
+{
+  "voice": {
+    "id": "vOIRno85PgKv4YKFyUlz",
+    "name": "Mike, warm, neutral and professional",
+    "model": "eleven_v4",
+    "settings": {
+      "stability": 0.55,
+      "similarity_boost": 0.8,
+      "style": 0.15,
+      "use_speaker_boost": true,
+      "speed": 1.07
+    }
+  },
+  "scenes": [
+    {
+      "id": "s01_map",
+      "tts": "PayPal, Visa and Mastercard move money all around the world. In Europe, the Americas and Asia, buyers pay in a single click. Then look at Africa. Fifty-four countries, more than a billion people, and many of them pay with mobile money and cash. A card form alone misses them."
+    },
+    {
+      "id": "s02_problem",
+      "tts": "We created Prone Data Learning to bring A I and automation skills across the African continent. And we hit the wall every seller hits here. One payment integration, for every single country."
+    },
+    {
+      "id": "s03_intro",
+      "tts": "That is why we built Prone Bridge. One checkout that accepts world payments, like PayPal, Visa and Mastercard, and local ones, like mobile money, bank transfer and U S S D. For any vendor. Online shops, learning platforms, software. In this demo, local methods are simulated."
+    },
+    {
+      "id": "s04_buyer",
+      "tts": "The buyer picks a country. The price, the currency and the payment methods follow. Method Match puts the one most likely to work first. PayPal and cards run through the PayPal sandbox. Local methods are simulated, like this one. And the course unlocks."
+    },
+    {
+      "id": "s05_seller",
+      "tts": "The seller sees the sale the second it happens. Volume, customers, payment links, payouts. One tap, and the payout is on its way."
+    },
+    {
+      "id": "s06_admin",
+      "tts": "The admin sees the whole network. Every payment is scored before money moves. Low goes through. Medium waits for a person. High is blocked at once. And country is never a signal. The engine refuses it."
+    },
+    {
+      "id": "s07_copilot",
+      "tts": "Then, A I changes the game. A copilot that reads the seller's own data, answers in plain words, and prepares changes, like a payment link. Nothing happens until the seller confirms."
+    },
+    {
+      "id": "s08_arch",
+      "tts": "Under the hood, one A P I, three tabs, and three services behind it. PayPal for money. OpenAI for intelligence. Supabase for live data."
+    },
+    {
+      "id": "s09_paypal",
+      "tts": "PayPal is the global rail. Orders for card and PayPal payments. Payouts for sellers. Webhooks, verified by PayPal itself. Everything settles in US dollars, so the diaspora and international buyers can pay a seller in Africa, with a method they already trust."
+    },
+    {
+      "id": "s10_ai",
+      "tts": "And OpenAI writes the words. The copilot, with twelve strict tools, and a plain note on every held payment. The rules decide. The A I explains. It never decides."
+    },
+    {
+      "id": "s11_close",
+      "tts": "Prone Bridge goes after the biggest bottleneck of selling in Africa. Payments. Built with PayPal, and OpenAI. Thank you."
+    }
+  ]
+}

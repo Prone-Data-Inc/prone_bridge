@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { freshSuffix, personaFor } from './personas.js'
+// @vitest-environment jsdom
+import { beforeEach, describe, expect, it } from 'vitest'
+import { browserSuffix, demoBuyerFor, freshSuffix, personaFor, rotateBrowserSuffix } from './personas.js'
 
 const COUNTRIES = ['CI', 'SN', 'CM', 'GN', 'ML', 'NG', 'GH', 'KE', 'ZA', 'MA']
 
@@ -34,5 +35,35 @@ describe('personaFor', () => {
 describe('freshSuffix', () => {
   it('is four digits', () => {
     for (let index = 0; index < 50; index += 1) expect(freshSuffix()).toMatch(/^[1-9]\d{3}$/)
+  })
+})
+
+describe("each browser's own demo buyer", () => {
+  beforeEach(() => window.localStorage.clear())
+
+  it('is a suffix of four digits, made once and kept in this browser', () => {
+    const first = browserSuffix()
+    expect(first).toMatch(/^[1-9]\d{3}$/)
+    expect(browserSuffix()).toBe(first)
+    expect(window.localStorage.getItem('pb.persona')).toBe(first)
+  })
+
+  it('gives the same person in every country the same suffix, so two browsers never share a buyer', () => {
+    window.localStorage.setItem('pb.persona', '4821')
+    expect(demoBuyerFor('CI')).toEqual({ name: 'Aminata Koné', email: 'aminata.kone4821@example.com' })
+    expect(demoBuyerFor('NG').email).toBe('chidi.okafor4821@example.com')
+  })
+
+  it('becomes a different person when asked', () => {
+    window.localStorage.setItem('pb.persona', '4821')
+    const next = rotateBrowserSuffix()
+    expect(next).toMatch(/^[1-9]\d{3}$/)
+    expect(browserSuffix()).toBe(next)
+    expect(demoBuyerFor('CI').email).toBe(`aminata.kone${next}@example.com`)
+  })
+
+  it('replaces a stored value that is not a suffix', () => {
+    window.localStorage.setItem('pb.persona', 'not-a-number')
+    expect(browserSuffix()).toMatch(/^[1-9]\d{3}$/)
   })
 })

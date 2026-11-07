@@ -31,6 +31,8 @@ const PLACEHOLDER =
 
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'coverage', '.vercel', 'output'])
 const SKIP_FILES = new Set(['package-lock.json'])
+/* Large generated output of the demo film (see video/): audio, frames and the video itself. Not source. */
+const SKIP_PATHS = ['video/work', 'video/out']
 const BINARY = new Set([
   '.png',
   '.jpg',
@@ -65,10 +67,13 @@ export function scanText(text) {
   return findings
 }
 
+const slashes = (path) => path.split(/[\\/]/).join('/')
+
 const skipPath = (path) => {
   const parts = path.split(/[\\/]/)
   return (
     parts.some((part) => SKIP_DIRS.has(part)) ||
+    SKIP_PATHS.some((skipped) => slashes(path).startsWith(`${skipped}/`)) ||
     SKIP_FILES.has(basename(path)) ||
     BINARY.has(extname(path).toLowerCase())
   )
@@ -82,6 +87,7 @@ function walk(dir, files = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_DIRS.has(entry.name)) continue
     const full = join(dir, entry.name)
+    if (SKIP_PATHS.includes(slashes(relative(ROOT, full)))) continue
     if (entry.isDirectory()) walk(full, files)
     else files.push(relative(ROOT, full))
   }

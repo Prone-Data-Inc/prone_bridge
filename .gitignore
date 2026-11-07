@@ -22,3 +22,9 @@ Thumbs.db
 
 # Supabase CA certificate (download it from your project, see README)
 certs/
+
+# The demo film: built from video/build, large, and made again at will
+video/work/
+video/out/
+# An image from somebody else, kept for reference only and never published with the code
+video/map-inspirational-img.webp

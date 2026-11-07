@@ -10,12 +10,15 @@ const { useCatalog } = await import('@/stores/catalog.js')
 const { useLearner } = await import('@/stores/learner.js')
 const { useNav } = await import('@/stores/nav.js')
 const { useSession } = await import('@/stores/session.js')
+const { useToasts } = await import('@/stores/toasts.js')
 const { default: Storefront } = await import('./Storefront.jsx')
 
 const merchant = { slug: 'pdl', name: 'Prone Data Learning' }
 
 beforeEach(() => {
+  window.localStorage.clear()
   window.location.hash = ''
+  useToasts.setState({ items: [] })
   useNav.setState({ view: 'app', tab: 'buyer', section: 'home' })
   useCatalog.setState({ status: 'ready', error: null, merchant, products: courses, countries, ensure: async () => {} })
   useLearner.setState({ courses: [], loaded: true })
@@ -64,14 +67,60 @@ describe('Storefront', () => {
     )
   })
 
-  it('shows a course the buyer owns as open, not for sale', () => {
+  it('shows a course the buyer owns as open and owned, not for sale', () => {
     useLearner.setState({ courses: [courses[0]], loaded: true })
     render(<Storefront />)
-    const owned = cards()[0]
+    /* owned courses come after the ones still to buy */
+    const owned = cards()[2]
+    expect(within(owned).getByRole('heading', { name: 'AI for Work' })).toBeTruthy()
+    expect(within(owned).getByText('Owned')).toBeTruthy()
     expect(within(owned).queryByRole('button', { name: 'Buy' })).toBeNull()
     fireEvent.click(within(owned).getByRole('button', { name: 'Open course' }))
     expect(window.location.hash).toBe('#/buyer/course/ai-for-work')
-    expect(within(cards()[1]).getByRole('button', { name: 'Buy' })).toBeTruthy()
+    expect(within(cards()[0]).getByRole('button', { name: 'Buy' })).toBeTruthy()
+    expect(within(cards()[0]).queryByText('Owned')).toBeNull()
+  })
+
+  it('puts the courses still to buy first, and keeps the catalog order inside each group', () => {
+    useLearner.setState({ courses: [courses[0]], loaded: true })
+    render(<Storefront />)
+    const titles = () => cards().map((card) => within(card).getByRole('heading').textContent)
+    expect(titles()).toEqual(['SQL in Practice', 'Workflow Automation', 'AI for Work'])
+  })
+
+  it('moves whichever course is owned to the end', () => {
+    useLearner.setState({ courses: [courses[1]], loaded: true })
+    render(<Storefront />)
+    const titles = cards().map((card) => within(card).getByRole('heading').textContent)
+    expect(titles).toEqual(['AI for Work', 'Workflow Automation', 'SQL in Practice'])
+  })
+
+  it('starts a new demo buyer when every course is owned, so there is always something to buy', async () => {
+    window.localStorage.setItem('pb.persona', '4821')
+    useSession.setState({ buyer: { id: 'b-1', name: 'Aminata Koné', email: 'aminata.kone4821@example.com' } })
+    useLearner.setState({ courses, loaded: true })
+    render(<Storefront />)
+
+    expect(useSession.getState().buyer).toBeNull()
+    expect(window.localStorage.getItem('pb.persona')).not.toBe('4821')
+    expect(useToasts.getState().items.map((item) => item.message)).toEqual([
+      'You own every course, so you are now a new demo buyer. There is always something to buy.',
+    ])
+  })
+
+  it('leaves the buyer alone while there is still a course to buy', () => {
+    useSession.setState({ buyer: { id: 'b-1', name: 'Aminata Koné', email: 'aminata.kone4821@example.com' } })
+    useLearner.setState({ courses: [courses[0], courses[1]], loaded: true })
+    render(<Storefront />)
+    expect(useSession.getState().buyer?.id).toBe('b-1')
+    expect(useToasts.getState().items).toEqual([])
+  })
+
+  it('does not decide anything before the courses of the buyer have loaded', () => {
+    useSession.setState({ buyer: { id: 'b-1', name: 'Aminata Koné', email: 'aminata.kone4821@example.com' } })
+    useLearner.setState({ courses, loaded: false })
+    render(<Storefront />)
+    expect(useSession.getState().buyer?.id).toBe('b-1')
   })
 
   it('shows placeholders while the courses load', () => {

@@ -100,6 +100,37 @@ describe('a buyer pays, and the seller and the admin see it', () => {
     expect(await screen.findByText('Best match first', undefined, SLOW)).toBeTruthy()
     expect(window.location.hash).toBe('#/buyer/checkout/ai-for-work')
   }, 60_000)
+
+  it('never shows "already bought": a visitor whose email already owns the course carries on as a new demo buyer', async () => {
+    const owner = email('owner')
+    open('#/buyer/checkout/ai-for-work')
+    await payAs(owner)
+    await heading("You're in")
+
+    /* another visitor, in another browser, types the same email for the same course */
+    cleanup()
+    resetClient()
+    open('#/buyer/checkout/ai-for-work')
+    await payAs(owner)
+    await heading("You're in")
+
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(document.body.textContent).not.toMatch(/already own/i)
+    const second = await stack.one(
+      'select b.email, p.status from public.payments p join public.buyers b on b.id = p.buyer_id order by p.created_at desc limit 1',
+    )
+    expect(second.status).toBe('succeeded')
+    expect(second.email).toMatch(/^aminata\.kone\d{4}@example\.com$/)
+    expect(second.email).not.toBe(owner)
+    /* two different buyers each own the course, and the first still has theirs */
+    expect(
+      await stack.count(
+        'enrollments e join public.products pr on pr.id = e.product_id join public.buyers b on b.id = e.buyer_id',
+        'pr.slug = $1 and (b.email = $2 or b.email = $3)',
+        ['ai-for-work', owner, second.email],
+      ),
+    ).toBe(2)
+  }, 90_000)
 })
 
 describe('a payment goes wrong, and the buyer tries again', () => {

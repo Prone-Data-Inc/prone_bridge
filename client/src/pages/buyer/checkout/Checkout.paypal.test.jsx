@@ -45,6 +45,8 @@ let paypal
 
 beforeEach(() => {
   window.localStorage.clear()
+  /* Each browser is its own demo buyer. This one is Aminata, number 4821. */
+  window.localStorage.setItem('pb.persona', '4821')
   window.location.hash = ''
   timing.waitMs = 0
   resetPaypalSdk()
@@ -166,7 +168,7 @@ describe('the PayPal button', () => {
       country: 'CI',
       method: 'paypal',
       sessionId: expect.any(String),
-      buyer: { name: 'Aminata Koné', email: 'aminata.kone@example.com' },
+      buyer: { name: 'Aminata Koné', email: 'aminata.kone4821@example.com' },
     })
     const [options, order] = paypal.paypalSession.start.mock.calls[0]
     expect(options).toEqual({ presentationMode: 'auto' })
@@ -185,8 +187,23 @@ describe('the PayPal button', () => {
     expect(within(receipt).getByText('USD 39.00')).toBeTruthy()
     expect(within(receipt).getByText('Visa ending 1881 (PayPal sandbox)')).toBeTruthy()
     expect(within(receipt).queryByText('Course price')).toBeNull()
-    expect(useSession.getState().buyer).toMatchObject({ id: 'buyer-1', email: 'aminata.kone@example.com' })
+    expect(useSession.getState().buyer).toMatchObject({ id: 'buyer-1', email: 'aminata.kone4821@example.com' })
     await waitFor(() => expect(listCourses).toHaveBeenCalledWith('buyer-1'))
+  })
+
+  it('carries on as a new demo buyer when the email already owns the course', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    checkoutApi.createPayment.mockRejectedValueOnce(
+      new ApiError(409, 'conflict', 'You already own this course.', 'r-1', { reason: 'already_owned' }),
+    )
+    await openPaypal()
+    await pressPaypal()
+
+    const [, order] = paypal.paypalSession.start.mock.calls[0]
+    await expect(order).resolves.toEqual({ orderId: 'ORDER1' })
+    expect(checkoutApi.createPayment).toHaveBeenCalledTimes(2)
+    expect(checkoutApi.createPayment.mock.calls[1][0].buyer.email).toBe('aminata.kone5500@example.com')
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 
   it('names the method on the receipt when a PayPal account paid', async () => {

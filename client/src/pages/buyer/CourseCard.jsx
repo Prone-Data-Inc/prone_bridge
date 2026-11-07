@@ -1,6 +1,7 @@
 /* A course on the storefront: its picture, name, facts and price, and a button to buy it or open it. */
 import { courseFacts, usd } from '@/lib/format.js'
 import { hashFor } from '@/stores/nav.js'
+import Badge from '@/ui/Badge.jsx'
 import { Button } from '@/ui/Button.jsx'
 import CourseCover from './CourseCover.jsx'
 import s from './CourseCard.module.css'
@@ -12,7 +13,14 @@ export default function CourseCard({ product, owned, onBuy, onOpen }) {
         <CourseCover product={product} />
       </a>
       <div className={s.body}>
-        <p className={s.tag}>{product.category === 'ai' ? 'AI' : product.category}</p>
+        <div className={s.meta}>
+          <p className={s.tag}>{product.category === 'ai' ? 'AI' : product.category}</p>
+          {owned && (
+            <Badge tone="success" dot>
+              Owned
+            </Badge>
+          )}
+        </div>
         <h3 className={s.title}>
           <a href={hashFor('buyer', 'course', product.slug)}>{product.title}</a>
         </h3>

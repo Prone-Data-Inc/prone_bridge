@@ -15,7 +15,7 @@ export const badRequest = (message = 'Check what you entered and try again.', de
 export const unauthorized = (message = 'Sign in to continue.') => new AppError(401, 'unauthorized', message)
 export const forbidden = (message = 'You cannot do that.') => new AppError(403, 'forbidden', message)
 export const notFound = (message = 'We could not find that.') => new AppError(404, 'not_found', message)
-export const conflict = (message = 'That already happened.') => new AppError(409, 'conflict', message)
+export const conflict = (message = 'That already happened.', details) => new AppError(409, 'conflict', message, details)
 export const payloadTooLarge = (message = 'That request is too large.') =>
   new AppError(413, 'payload_too_large', message)
 export const unsupportedMediaType = (message = 'Send the request as JSON.') =>

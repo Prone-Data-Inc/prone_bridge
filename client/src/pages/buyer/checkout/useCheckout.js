@@ -27,7 +27,8 @@ import { useLearner } from '@/stores/learner.js'
 import { useNotifications } from '@/stores/notifications.js'
 import { usePaypal } from '@/stores/paypal.js'
 import { useSession } from '@/stores/session.js'
-import { freshSuffix, personaFor } from './personas.js'
+import { toast } from '@/stores/toasts.js'
+import { demoBuyerFor, rotateBrowserSuffix } from './personas.js'
 import { testPhone, timing } from './simulation.js'
 
 const COUNTRY_KEY = 'pb.country'
@@ -59,6 +60,9 @@ const problemFrom = (error) => ({
   fields: error.details,
 })
 
+/* The server refuses to sell a course twice to the same email, and says why with a stable reason. */
+const isAlreadyOwned = (error) => error?.status === 409 && error.details?.reason === 'already_owned'
+
 /* Where a payment goes next. Anything PayPal still holds is pending. */
 const PHASES = { succeeded: 'paid', failed: 'failed', blocked: 'blocked', in_review: 'review' }
 const phaseFor = (status) => PHASES[status] ?? 'pending'
@@ -78,7 +82,7 @@ export function useCheckout(product, link = null) {
   const [methodId, setMethodId] = useState(null)
   const [outcome, setOutcome] = useState('approve')
   const [contact, setContact] = useState(() =>
-    buyer ? { name: buyer.name ?? '', email: buyer.email ?? '' } : personaFor(storedCountry()),
+    buyer ? { name: buyer.name ?? '', email: buyer.email ?? '' } : demoBuyerFor(storedCountry()),
   )
   const [touched, setTouched] = useState(Boolean(buyer))
   const [phone, setPhone] = useState('')
@@ -171,7 +175,7 @@ export function useCheckout(product, link = null) {
       setMethodId(null)
       setPhone('')
       setProblem(null)
-      if (!touched) setContact(personaFor(code))
+      if (!touched) setContact(demoBuyerFor(code))
       if (sessionId) changeSessionCountry(sessionId, code).catch(() => {})
     },
     [sessionId, touched],
@@ -191,7 +195,8 @@ export function useCheckout(product, link = null) {
 
   /* Another take of the demo: the same person, a different buyer, so they can buy the same course again. */
   const useNewBuyer = useCallback(() => {
-    setContact(personaFor(place?.code ?? DEFAULT_COUNTRY, freshSuffix()))
+    rotateBrowserSuffix()
+    setContact(demoBuyerFor(place?.code ?? DEFAULT_COUNTRY))
     setTouched(true)
     setProblem(null)
   }, [place])
@@ -213,9 +218,27 @@ export function useCheckout(product, link = null) {
 
   /* The buyer is now known: their messages and their courses come with them. */
   const rememberBuyer = useCallback(
-    (id) => useSession.getState().setBuyer({ id, name: contact.name.trim(), email: contact.email.trim() }),
+    (id, who = contact) => useSession.getState().setBuyer({ id, name: who.name.trim(), email: who.email.trim() }),
     [contact],
   )
+
+  /* Makes the payment. If the email in the form already owns this course, a demo is never left at a refusal: it carries
+     on as a new demo buyer, with a request of its own, and says so. Answers the payment and who it was made for. */
+  const createFor = useCallback(async () => {
+    try {
+      return { ...(await createPayment(requestBody())), who: contact }
+    } catch (error) {
+      if (!isAlreadyOwned(error)) throw error
+      rotateBrowserSuffix()
+      const who = demoBuyerFor(place.code)
+      key.current = crypto.randomUUID()
+      setContact(who)
+      setTouched(true)
+      toast('That email already has this course, so you are paying as a new demo buyer.', { title: 'Demo' })
+      const body = { ...requestBody(), idempotencyKey: key.current, buyer: { name: who.name, email: who.email } }
+      return { ...(await createPayment(body)), who }
+    }
+  }, [requestBody, contact, place])
 
   /* A payment is over, or held for a person: show how it stands, and bring in the notification and the unlocked course.
      A payment held for review keeps its request, so approving it lets the same payment go on. */
@@ -269,9 +292,9 @@ export function useCheckout(product, link = null) {
     setProblem(null)
     setPhase('creating')
     try {
-      const { payment: created } = await createPayment(requestBody())
+      const { payment: created, who } = await createFor()
       setPayment(created)
-      rememberBuyer(created.buyer.id)
+      rememberBuyer(created.buyer.id, who)
       /* The safety check held it, or stopped it, before any money moved. */
       if (created.status === 'in_review' || created.status === 'blocked') {
         await finalize(created)
@@ -288,16 +311,16 @@ export function useCheckout(product, link = null) {
       setPhase('form')
       setProblem(problemFrom(error))
     }
-  }, [valid, viaPaypal, phase, requestBody, rememberBuyer, outcome, finalize])
+  }, [valid, viaPaypal, phase, createFor, rememberBuyer, outcome, finalize])
 
   /* Card and PayPal, step one: make the payment and its PayPal order. Answers { paymentId, orderId }, or null when the
      payment turned out to be over already. The form stays as it is. A failure is shown, then thrown to PayPal's SDK. */
   const begin = useCallback(async () => {
     setProblem(null)
     try {
-      const { payment: created, paypal } = await createPayment(requestBody())
+      const { payment: created, paypal, who } = await createFor()
       setPayment(created)
-      rememberBuyer(created.buyer.id)
+      rememberBuyer(created.buyer.id, who)
       if (!paypal) {
         await finalize(created)
         return null
@@ -310,7 +333,7 @@ export function useCheckout(product, link = null) {
       error.reported = true
       throw error
     }
-  }, [requestBody, rememberBuyer, finalize])
+  }, [createFor, rememberBuyer, finalize])
 
   /* Step two, once the buyer has approved in PayPal's window or the card fields: the server takes the money. If that
      cannot be confirmed, the order is kept, so the same capture can be asked for again and money is never taken twice. */

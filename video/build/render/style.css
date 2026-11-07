@@ -1,0 +1,105 @@
+/* The look of the film. It uses the ProneBridge palette and the same type as the app (Inter, and Outfit for the name). */
+@font-face {
+  font-family: 'Inter';
+  src: url('/repo/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+}
+@font-face {
+  font-family: 'Outfit';
+  src: url('/repo/node_modules/@fontsource/outfit/files/outfit-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+}
+@font-face {
+  font-family: 'Outfit';
+  src: url('/repo/node_modules/@fontsource/outfit/files/outfit-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'Mono';
+  src: local('Cascadia Mono'), local('Consolas');
+}
+
+:root {
+  --blue: #0070e0;
+  --deep: #003087;
+  --sky: #009cde;
+  --ink: #0b1b3f;
+  --mist: #eaf3fd;
+  --on-dark: #4da3ff;
+  --text-2: #4a5878;
+  --text-3: #7d8aa6;
+  --line: #d6e2f5;
+  --green: #12a150;
+  --violet: #7a5ad6;
+  --amber: #d98a00;
+  --red: #d63f4a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body {
+  background: #000;
+  overflow: hidden;
+}
+
+#stage {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #f6f9ff;
+  color: var(--ink);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.display {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Captions: one short line at a time, timed to the voice. */
+#captions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 44px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 50;
+}
+
+#captions span {
+  max-width: 1560px;
+  padding: 14px 32px 15px;
+  border-radius: 18px;
+  background: rgba(11, 27, 63, 0.88);
+  color: #fff;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(11, 27, 63, 0.28);
+}
+
+/* A small line under the picture: what is real and what is simulated. */
+.note {
+  position: absolute;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-3);
+  letter-spacing: 0.005em;
+}
